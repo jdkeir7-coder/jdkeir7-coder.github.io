@@ -1,0 +1,1322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loopline — a route for exactly how far you want to go</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0F1712;
+    --bg-soft:#141F18;
+    --panel:#17231C;
+    --panel-line:#26362C;
+    --paper:#F2EEE1;
+    --paper-dim:#B9C4B6;
+    --muted:#7C8C80;
+    --lime:#C7F136;
+    --orange:#E8632F;
+    --blue:#5FA6D6;
+    --radius:14px;
+    --display: 'Archivo Black', sans-serif;
+    --body: 'IBM Plex Sans', sans-serif;
+    --mono: 'IBM Plex Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--paper);
+    font-family:var(--body);
+    min-height:100vh;
+    background-image:
+      radial-gradient(circle at 15% 10%, rgba(199,241,54,0.05), transparent 40%),
+      radial-gradient(circle at 90% 80%, rgba(95,166,214,0.06), transparent 45%);
+  }
+  a{color:inherit;}
+
+  .contour-bg{ position:absolute; inset:0; z-index:0; opacity:0.5; pointer-events:none; }
+
+  header{
+    position:relative; z-index:1;
+    padding:28px clamp(20px,4vw,56px) 18px;
+    display:flex; align-items:baseline; justify-content:space-between;
+    flex-wrap:wrap; gap:10px;
+    border-bottom:1px solid var(--panel-line);
+  }
+  .wordmark{
+    font-family:var(--display); font-size:clamp(22px,3vw,30px); letter-spacing:0.5px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .wordmark .dot{width:10px;height:10px;border-radius:50%;background:var(--lime);box-shadow:0 0 12px var(--lime);}
+  .tagline{color:var(--muted); font-size:13.5px; font-family:var(--mono); letter-spacing:0.3px;}
+
+  main{
+    position:relative; z-index:1;
+    display:grid; grid-template-columns:360px 1fr; gap:0;
+    min-height:calc(100vh - 92px);
+  }
+  @media (max-width:900px){ main{grid-template-columns:1fr;} }
+
+  .panel{
+    background:var(--panel); border-right:1px solid var(--panel-line);
+    padding:26px 24px 40px; display:flex; flex-direction:column; gap:26px;
+  }
+  .field-label{
+    font-family:var(--mono); font-size:11px; letter-spacing:1.4px; text-transform:uppercase;
+    color:var(--muted); margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;
+  }
+
+  .distance-row{display:flex; align-items:flex-end; gap:14px;}
+  .distance-value{ font-family:var(--display); font-size:52px; line-height:1; color:var(--lime); min-width:120px; }
+  .unit-toggle{display:flex; border:1px solid var(--panel-line); border-radius:999px; overflow:hidden;}
+  .unit-toggle button{
+    background:transparent; border:none; color:var(--muted); font-family:var(--mono); font-size:12px;
+    padding:7px 13px; cursor:pointer;
+  }
+  .unit-toggle button.active{background:var(--lime); color:#0F1712; font-weight:600;}
+  input[type=range]{
+    -webkit-appearance:none; width:100%; height:4px; border-radius:2px; background:var(--panel-line);
+    margin-top:14px; cursor:pointer;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; width:18px; height:18px; border-radius:50%;
+    background:var(--lime); border:3px solid var(--bg); cursor:pointer; margin-top:-7px;
+    box-shadow:0 0 0 1px var(--lime);
+  }
+  .quickset{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;}
+  .quickset button{
+    background:var(--bg-soft); border:1px solid var(--panel-line); color:var(--paper-dim);
+    font-family:var(--mono); font-size:11.5px; padding:5px 10px; border-radius:999px; cursor:pointer;
+  }
+  .quickset button:hover, .quickset button:focus-visible{border-color:var(--lime); color:var(--lime);}
+
+  .start-controls{display:flex; flex-direction:column; gap:8px;}
+  .btn{
+    font-family:var(--body); font-weight:600; font-size:13.5px;
+    padding:10px 14px; border-radius:10px; border:1px solid var(--panel-line);
+    background:var(--bg-soft); color:var(--paper); cursor:pointer; text-align:left;
+    display:flex; align-items:center; gap:10px;
+  }
+  .btn:hover, .btn:focus-visible{border-color:var(--blue);}
+  .btn.active{
+    border-color:var(--lime);
+    box-shadow:0 0 0 2px rgba(199,241,54,0.35);
+    background:rgba(199,241,54,0.08); color:var(--lime);
+  }
+  .btn.primary{
+    background:var(--lime); color:#0F1712; border:none; justify-content:center; font-size:14.5px;
+    padding:13px; text-align:center;
+  }
+  .btn.primary:hover{filter:brightness(1.08);}
+  .btn.primary:disabled{opacity:0.5; cursor:not-allowed; filter:none;}
+  .hint{color:var(--muted); font-size:12px; line-height:1.5;}
+  .badge{
+    font-family:var(--mono); font-size:11.5px; color:var(--blue);
+    border:1px dashed var(--blue); border-radius:8px; padding:6px 9px; display:none;
+  }
+  .street-status{
+    font-family:var(--mono); font-size:11.5px; display:none; align-items:center; gap:7px;
+    padding:6px 9px; border-radius:8px; border:1px dashed var(--panel-line); color:var(--muted);
+  }
+  .street-status .spin{
+    width:8px; height:8px; border-radius:50%; border:1.5px solid var(--muted);
+    border-top-color:var(--lime); animation:spin 0.8s linear infinite;
+  }
+  .street-status.ok{border-color:var(--lime); color:var(--lime);}
+  .street-status.ok .spin{display:none;}
+  .street-status.approx{border-color:var(--orange); color:var(--orange);}
+  .street-status.approx .spin{display:none;}
+  .street-status.err{border-color:var(--orange); color:var(--orange);}
+  .street-status.err .spin{display:none;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .chip-group{display:flex; flex-wrap:wrap; gap:8px;}
+  .chip{
+    border:1px solid var(--panel-line); background:var(--bg-soft); color:var(--paper-dim);
+    font-size:13px; padding:8px 13px; border-radius:999px; cursor:pointer; user-select:none;
+  }
+  .chip.active{background:rgba(199,241,54,0.12); border-color:var(--lime); color:var(--lime);}
+  .chip.active.orange{background:rgba(232,99,47,0.14); border-color:var(--orange); color:var(--orange);}
+  .chip.active.blue{background:rgba(95,166,214,0.14); border-color:var(--blue); color:var(--blue);}
+
+  .pace-row{display:flex; align-items:center; gap:10px;}
+  .pace-row input[type=number]{
+    width:56px; background:var(--bg-soft); border:1px solid var(--panel-line); color:var(--paper);
+    font-family:var(--mono); padding:7px; border-radius:8px; font-size:13px;
+  }
+
+  .stage{padding:26px clamp(18px,3vw,40px) 40px; display:flex; flex-direction:column; gap:20px;}
+
+  .map-wrap{
+    position:relative; border-radius:var(--radius); overflow:hidden;
+    border:1px solid var(--panel-line); background:var(--bg-soft);
+    aspect-ratio:16/10.5;
+  }
+  #tileLayer{
+    position:absolute; inset:0; z-index:0; overflow:hidden; cursor:crosshair;
+    filter:invert(0.92) hue-rotate(180deg) brightness(0.95) contrast(0.9) saturate(0.55);
+  }
+  #tileLayer img{position:absolute; width:256px; height:256px; user-select:none; -webkit-user-drag:none;}
+  svg#routeSvg{position:absolute; inset:0; width:100%; height:100%; z-index:1; pointer-events:none;}
+
+  .map-searchbar{
+    position:absolute; top:12px; left:12px; right:12px; z-index:4;
+    display:flex; gap:8px;
+  }
+  .map-searchbar .search-field{position:relative; flex:1;}
+  .map-searchbar input{
+    width:100%; background:rgba(15,23,18,0.9); border:1px solid var(--panel-line); color:var(--paper);
+    font-family:var(--body); font-size:13.5px; padding:10px 13px; border-radius:10px;
+    backdrop-filter:blur(2px);
+  }
+  .map-searchbar input::placeholder{color:var(--muted);}
+  .map-searchbar input:focus{outline:none; border-color:var(--lime);}
+  .map-searchbar button{
+    background:var(--lime); color:#0F1712; border:none; font-weight:700; font-size:13px;
+    padding:0 16px; border-radius:10px; cursor:pointer; white-space:nowrap;
+  }
+  .map-searchbar button:hover{filter:brightness(1.08);}
+  .suggestions{
+    position:absolute; top:calc(100% + 6px); left:0; right:0; z-index:6;
+    background:#101B15; border:1px solid var(--panel-line); border-radius:10px;
+    overflow:hidden; display:none; box-shadow:0 10px 30px rgba(0,0,0,0.5);
+  }
+  .suggestions.show{display:block;}
+  .suggestions .sug-item{
+    padding:10px 13px; font-size:13px; color:var(--paper-dim); cursor:pointer;
+    border-bottom:1px solid var(--panel-line); line-height:1.4;
+  }
+  .suggestions .sug-item:last-child{border-bottom:none;}
+  .suggestions .sug-item:hover, .suggestions .sug-item.highlighted{background:rgba(199,241,54,0.1); color:var(--paper);}
+  .suggestions .sug-item .main{display:block; font-weight:600; color:var(--paper);}
+  .suggestions .sug-item .sub{display:block; font-size:11.5px; color:var(--muted); margin-top:2px;}
+  .suggestions .sug-empty{padding:10px 13px; font-size:12.5px; color:var(--muted);}
+
+  .map-caption{
+    position:absolute; left:14px; bottom:12px; z-index:2;
+    font-family:var(--mono); font-size:11px; color:var(--paper-dim);
+    background:rgba(15,23,18,0.75); padding:5px 9px; border-radius:7px; border:1px solid var(--panel-line);
+  }
+  .map-hint{
+    position:absolute; left:50%; bottom:12px; transform:translateX(-50%); z-index:2;
+    font-family:var(--mono); font-size:11.5px; color:var(--bg);
+    background:var(--lime); padding:7px 14px; border-radius:999px; display:none;
+    box-shadow:0 4px 14px rgba(0,0,0,0.4);
+  }
+  .map-empty{
+    position:absolute; inset:0; z-index:2; display:flex; flex-direction:column; align-items:center;
+    justify-content:center; gap:8px; text-align:center; padding:20px 20px 60px; color:var(--muted);
+    background:rgba(15,23,18,0.45); pointer-events:none;
+  }
+  .map-empty strong{color:var(--paper); font-family:var(--display); font-size:18px; font-weight:400;}
+  .map-error{
+    position:absolute; inset:0; z-index:5; display:flex; flex-direction:column; align-items:center;
+    justify-content:center; gap:10px; text-align:center; padding:28px; background:rgba(15,23,18,0.94);
+  }
+  .map-error strong{color:var(--orange); font-family:var(--display); font-size:16px; font-weight:400;}
+  .map-error span{color:var(--paper-dim); font-size:13px; line-height:1.6; max-width:420px;}
+  .map-error button{
+    margin-top:6px; background:var(--lime); color:#0F1712; border:none; font-weight:700;
+    padding:8px 16px; border-radius:8px; cursor:pointer; font-size:13px;
+  }
+
+  .route-banner{
+    display:none; align-items:center; gap:14px;
+    background:linear-gradient(135deg, rgba(199,241,54,0.16), rgba(199,241,54,0.05));
+    border:1px solid var(--lime); border-radius:var(--radius);
+    padding:16px 18px;
+    opacity:0; transform:translateY(-8px) scale(0.98);
+    transition:opacity .35s ease, transform .35s ease;
+  }
+  .route-banner.show{display:flex; opacity:1; transform:translateY(0) scale(1);}
+  .rb-check{
+    width:36px; height:36px; border-radius:50%; background:var(--lime); color:#0F1712;
+    display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:900;
+    flex-shrink:0; box-shadow:0 0 18px rgba(199,241,54,0.5);
+  }
+  .rb-copy{display:flex; flex-direction:column; gap:2px;}
+  .rb-copy strong{font-family:var(--display); font-size:17px; font-weight:400; letter-spacing:0.3px;}
+  .rb-copy span{font-family:var(--mono); font-size:12.5px; color:var(--paper-dim);}
+
+  .readout{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:1px;
+    background:var(--panel-line); border-radius:var(--radius); overflow:hidden;
+    border:1px solid var(--panel-line);
+  }
+  @media (max-width:640px){.readout{grid-template-columns:repeat(2,1fr);}}
+  .readout .cell{
+    background:var(--panel); padding:16px 14px; border-top:2px solid transparent;
+    opacity:0; transform:translateY(6px); animation:cellIn .4s ease forwards;
+  }
+  .readout .cell:nth-child(1){animation-delay:.05s; border-top-color:var(--lime);}
+  .readout .cell:nth-child(2){animation-delay:.12s; border-top-color:var(--orange);}
+  .readout .cell:nth-child(3){animation-delay:.19s; border-top-color:var(--lime);}
+  .readout .cell:nth-child(4){animation-delay:.26s; border-top-color:var(--blue);}
+  @keyframes cellIn{ to{opacity:1; transform:translateY(0);} }
+  .readout .cell .k{font-family:var(--mono); font-size:10.5px; letter-spacing:1px; text-transform:uppercase; color:var(--muted);}
+  .readout .cell .v{font-family:var(--mono); font-size:26px; color:var(--lime); margin-top:4px; font-weight:600;}
+  .readout .cell .v.orange{color:var(--orange);}
+  .readout .cell .v.blue{color:var(--blue);}
+
+  .elev-wrap{ border:1px solid var(--panel-line); border-radius:var(--radius); background:var(--panel); padding:14px 16px 8px; }
+  .elev-wrap svg{width:100%; height:60px; display:block;}
+
+  .options-label{font-family:var(--mono); font-size:11px; letter-spacing:1.4px; text-transform:uppercase; color:var(--muted);}
+  .options{display:grid; grid-template-columns:repeat(3,1fr); gap:12px;}
+  @media (max-width:760px){.options{grid-template-columns:1fr;}}
+  .option-card{
+    border:1px solid var(--panel-line); border-radius:12px; background:var(--panel);
+    padding:14px 16px; cursor:pointer; transition:border-color .15s;
+  }
+  .option-card:hover, .option-card:focus-visible{border-color:var(--lime);}
+  .option-card.selected{border-color:var(--lime); background:rgba(199,241,54,0.06);}
+  .option-card .name{font-weight:700; font-size:14px; margin-bottom:6px;}
+  .option-card .meta{font-family:var(--mono); font-size:12px; color:var(--paper-dim); display:flex; justify-content:space-between;}
+
+  details.about{
+    border:1px solid var(--panel-line); border-radius:12px; padding:14px 16px; background:var(--panel);
+    color:var(--paper-dim); font-size:13px; line-height:1.6;
+  }
+  details.about summary{cursor:pointer; font-family:var(--mono); font-size:12px; letter-spacing:0.6px; color:var(--muted); text-transform:uppercase;}
+  details.about p{margin:10px 0 4px;}
+  details.about code{background:var(--bg-soft); padding:1px 6px; border-radius:5px; font-family:var(--mono); font-size:12px; color:var(--lime);}
+
+  .toast{
+    position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:var(--panel); border:1px solid var(--lime); color:var(--paper);
+    padding:10px 18px; border-radius:999px; font-size:13px; z-index:50;
+    opacity:0; pointer-events:none; transition:opacity .25s, transform .25s;
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+  @media (prefers-reduced-motion:reduce){ *{transition:none !important; animation:none !important;} }
+</style>
+</head>
+<body>
+
+<svg class="contour-bg" id="contourBg" xmlns="http://www.w3.org/2000/svg"></svg>
+
+<header>
+  <div>
+    <div class="wordmark"><span class="dot"></span>Loopline</div>
+    <div class="tagline">pick a distance — we'll draw the route</div>
+  </div>
+  <div class="tagline" id="clock"></div>
+</header>
+
+<main>
+  <!-- ============ CONTROL PANEL ============ -->
+  <section class="panel">
+
+    <div>
+      <div class="field-label">Distance</div>
+      <div class="distance-row">
+        <div class="distance-value" id="distValue">10.0</div>
+        <div style="font-family:var(--mono); color:var(--muted); font-size:14px; margin-bottom:8px;" id="distUnitLabel">km</div>
+        <div class="unit-toggle" style="margin-left:auto;">
+          <button id="unitKm" class="active">KM</button>
+          <button id="unitMi">MI</button>
+        </div>
+      </div>
+      <input type="range" id="distSlider" min="1" max="30" step="0.5" value="10">
+      <div class="quickset">
+        <button data-v="5">5</button>
+        <button data-v="10">10</button>
+        <button data-v="15">15</button>
+        <button data-v="21.1">Half</button>
+        <button data-v="42.2">Marathon</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="field-label">Start point</div>
+      <div class="start-controls">
+        <button class="btn" id="useLocationBtn">📍 Use my current location</button>
+        <button class="btn" id="dropPinBtn">📌 Drop a pin on the map</button>
+        <span class="badge" id="locBadge"></span>
+        <div class="street-status" id="streetStatus"><span class="spin"></span><span id="streetStatusText">Loading streets…</span></div>
+        <div class="hint">Or search an address at the top of the map, or click anywhere on it.</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="field-label">Terrain</div>
+      <div class="chip-group" id="terrainChips">
+        <div class="chip active" data-val="flat">Flat</div>
+        <div class="chip" data-val="rolling">Rolling</div>
+        <div class="chip orange" data-val="hilly">Hilly</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="field-label">Lighting</div>
+      <div class="chip-group" id="lightChips">
+        <div class="chip" data-val="any">Doesn't matter</div>
+        <div class="chip blue" data-val="lit">Well-lit only <span style="opacity:.6">(night run)</span></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="field-label">Route shape</div>
+      <div class="chip-group" id="shapeChips">
+        <div class="chip active" data-val="loop">Loop</div>
+        <div class="chip" data-val="out-back">Out &amp; back</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="field-label">Your pace <span style="text-transform:none; letter-spacing:0;">(for time estimate)</span></div>
+      <div class="pace-row">
+        <input type="number" id="paceMin" value="6" min="3" max="15"> :
+        <input type="number" id="paceSec" value="0" min="0" max="59" style="width:46px;">
+        <span style="font-family:var(--mono); font-size:12px; color:var(--muted);" id="paceUnit">min / km</span>
+      </div>
+    </div>
+
+    <button class="btn primary" id="generateBtn">Find me a route →</button>
+  </section>
+
+  <!-- ============ MAP / RESULTS ============ -->
+  <section class="stage">
+
+    <div class="map-wrap" id="mapWrap">
+      <div id="tileLayer"></div>
+      <svg id="routeSvg"></svg>
+
+      <div class="map-searchbar">
+        <div class="search-field">
+          <input type="text" id="addressInput" placeholder="Search an address or postcode…" autocomplete="off">
+          <div class="suggestions" id="addressSuggestions"></div>
+        </div>
+        <button id="addressSearchBtn">Search</button>
+      </div>
+
+      <div class="map-empty" id="mapEmpty">
+        <strong>No start point yet.</strong>
+        <span>Search an address above, tap "Use my current location," or click anywhere on the map.</span>
+      </div>
+      <div class="map-hint" id="mapHint">Click the map to drop your start pin</div>
+      <div class="map-error" id="mapError" style="display:none;"></div>
+      <div class="map-caption" id="mapCaption" style="display:none;"></div>
+    </div>
+
+    <div class="route-banner" id="routeBanner">
+      <div class="rb-check">✓</div>
+      <div class="rb-copy">
+        <strong id="rbTitle">Route ready</strong>
+        <span id="rbSub">—</span>
+      </div>
+    </div>
+
+    <div class="readout" id="readout" style="display:none;">
+      <div class="cell"><div class="k">Distance</div><div class="v" id="statDist">—</div></div>
+      <div class="cell"><div class="k">Elevation gain</div><div class="v orange" id="statElev">—</div></div>
+      <div class="cell"><div class="k">Est. time</div><div class="v" id="statTime">—</div></div>
+      <div class="cell"><div class="k">Well-lit</div><div class="v blue" id="statLit">—</div></div>
+    </div>
+
+    <div class="elev-wrap" id="elevWrap" style="display:none;">
+      <div class="field-label" style="margin-bottom:6px;">Elevation profile</div>
+      <svg id="elevSvg" viewBox="0 0 400 60" preserveAspectRatio="none"></svg>
+    </div>
+
+    <div id="optionsWrap" style="display:none;">
+      <div class="options-label" style="margin-bottom:10px;">Other routes matching your filters</div>
+      <div class="options" id="optionsList"></div>
+    </div>
+
+    <details class="about">
+      <summary>About this prototype</summary>
+      <p>The base map is live OpenStreetMap tile imagery — no API key needed. Routing normally runs on a real street graph fetched from OpenStreetMap's <code>Overpass API</code> around your start point, with lighting from OSM's <code>lit</code> tag and elevation from <code>Open-Elevation</code>. Address search (with live autocomplete) uses OSM's <code>Nominatim</code> geocoder.</p>
+      <p>If Overpass can't be reached — some networks block third-party API calls even when map tiles load fine — Loopline automatically falls back to a plausible, geographically-anchored street grid so route generation still works. You'll see this flagged as "approximate streets" in the status line and on the results.</p>
+      <p>These are free public services with light rate limits; for production traffic, use a paid tile provider (Mapbox/MapTiler) and self-host or cache Overpass/Nominatim.</p>
+    </details>
+
+  </section>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ========================================================================
+   LOOPLINE — route generator running on a real, live map
+   Base map: OpenStreetMap tile imagery, loaded as plain <img> tiles — this
+   renders regardless of whether the Overpass/Nominatim fetch calls succeed,
+   which is why the map is now visible immediately on pin placement.
+   Streets/routing: OpenStreetMap via Overpass API (buildGraphFromOSM), with
+   elevation from Open-Elevation. Address search: Nominatim geocoder.
+   ======================================================================== */
+
+// ---------- state ----------
+const state = {
+  unit: 'km',
+  distanceKm: 10,
+  terrain: 'flat',
+  light: 'any',
+  shape: 'loop',
+  startNode: null,   // nearest real street-graph node to the pin, once loaded
+  pinLat: null, pinLon: null, // exact point the user chose (click/search/GPS)
+  pace: {min:6, sec:0},
+  graph: null,
+  graphStatus: 'idle', // idle | loading | ready | approx | error
+  placingPin: false,
+  routes: [],
+  selectedIdx: 0,
+};
+
+const view = { lat: 0, lon: 0, zoom: 16, set: false };
+
+// ---------- utils ----------
+const $ = sel => document.querySelector(sel);
+const km2mi = km => km * 0.621371;
+const mi2km = mi => mi / 0.621371;
+function toast(msg){
+  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toast._h); toast._h = setTimeout(()=>t.classList.remove('show'), 2600);
+}
+function fmtDist(km){
+  return state.unit==='km' ? `${km.toFixed(1)} km` : `${km2mi(km).toFixed(1)} mi`;
+}
+function fmtTime(mins){
+  const h = Math.floor(mins/60), m = Math.round(mins%60);
+  return h>0 ? `${h}h ${m}m` : `${m} min`;
+}
+function mulberry32(seed){
+  return function(){
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function fetchWithTimeout(url, opts={}, ms=12000){
+  const ctrl = new AbortController();
+  const t = setTimeout(()=>ctrl.abort(), ms);
+  return fetch(url, {...opts, signal: ctrl.signal}).finally(()=>clearTimeout(t));
+}
+function haversineKm(lat1, lon1, lat2, lon2){
+  const R = 6371, toRad = d => d*Math.PI/180;
+  const dLat = toRad(lat2-lat1), dLon = toRad(lon2-lon1);
+  const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
+  return 2*R*Math.asin(Math.sqrt(a));
+}
+function clamp01(x){return Math.max(0,Math.min(1,x));}
+
+// ---------- contour background (signature element) ----------
+function drawContourBg(){
+  const svg = $('#contourBg');
+  const w = window.innerWidth, h = window.innerHeight;
+  svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+  svg.innerHTML = '';
+  const rng = mulberry32(7);
+  for(let i=0;i<9;i++){
+    const y = (i/9)*h*1.3 - h*0.1;
+    let d = `M -50 ${y}`;
+    for(let x=-50;x<w+50;x+=60){
+      const wob = Math.sin(x*0.01 + i*1.3)*30*rng() + Math.sin(x*0.005+i)*40;
+      d += ` L ${x} ${y+wob}`;
+    }
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d', d);
+    path.setAttribute('stroke', '#26362C');
+    path.setAttribute('stroke-width', '1');
+    path.setAttribute('fill', 'none');
+    svg.appendChild(path);
+  }
+}
+drawContourBg();
+window.addEventListener('resize', drawContourBg);
+
+// ---------- clock ----------
+function tickClock(){ $('#clock').textContent = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); }
+tickClock(); setInterval(tickClock, 15000);
+
+/* ============================ MAP PROJECTION ============================
+   Standard Web Mercator slippy-map tile math. This is the same projection
+   OpenStreetMap/Google/Mapbox tiles use, so pins and routes line up with
+   the tile imagery pixel-for-pixel. */
+const TILE_SIZE = 256;
+function lonToTileX(lon, zoom){ return (lon + 180) / 360 * Math.pow(2, zoom); }
+function latToTileY(lat, zoom){
+  const rad = lat * Math.PI / 180;
+  return (1 - Math.log(Math.tan(rad) + 1/Math.cos(rad)) / Math.PI) / 2 * Math.pow(2, zoom);
+}
+function tileXToLon(x, zoom){ return x / Math.pow(2, zoom) * 360 - 180; }
+function tileYToLat(y, zoom){
+  const n = Math.PI - 2*Math.PI*y / Math.pow(2, zoom);
+  return 180/Math.PI * Math.atan(0.5*(Math.exp(n)-Math.exp(-n)));
+}
+let CW=0, CH=0;
+function projectToPx(lat, lon){
+  const centerPxX = lonToTileX(view.lon, view.zoom) * TILE_SIZE;
+  const centerPxY = latToTileY(view.lat, view.zoom) * TILE_SIZE;
+  const x = lonToTileX(lon, view.zoom) * TILE_SIZE - centerPxX + CW/2;
+  const y = latToTileY(lat, view.zoom) * TILE_SIZE - centerPxY + CH/2;
+  return {x, y};
+}
+function unprojectFromPx(x, y){
+  const centerPxX = lonToTileX(view.lon, view.zoom) * TILE_SIZE;
+  const centerPxY = latToTileY(view.lat, view.zoom) * TILE_SIZE;
+  const tileX = (x - CW/2 + centerPxX) / TILE_SIZE;
+  const tileY = (y - CH/2 + centerPxY) / TILE_SIZE;
+  return {lat: tileYToLat(tileY, view.zoom), lon: tileXToLon(tileX, view.zoom)};
+}
+// graph nodes carry lat/lon directly, so nodePx is just the same projection
+function nodePx(n){ return projectToPx(n.lat, n.lon); }
+
+function sizeMap(){
+  const rect = $('#mapWrap').getBoundingClientRect();
+  CW = rect.width; CH = rect.height;
+  $('#routeSvg').setAttribute('viewBox', `0 0 ${CW} ${CH}`);
+}
+
+// Renders the visible OSM raster tiles as plain <img> elements. This does
+// NOT depend on Overpass/fetch succeeding — images load independently and
+// almost never hit the CORS/blocking issues a fetch() call can.
+const TILE_SUBDOMAINS = ['a','b','c'];
+function renderTileLayer(){
+  const layer = $('#tileLayer');
+  layer.innerHTML = '';
+  if(!view.set) return;
+  const centerPxX = lonToTileX(view.lon, view.zoom) * TILE_SIZE;
+  const centerPxY = latToTileY(view.lat, view.zoom) * TILE_SIZE;
+  const topLeftPxX = centerPxX - CW/2;
+  const topLeftPxY = centerPxY - CH/2;
+  const firstTileX = Math.floor(topLeftPxX / TILE_SIZE);
+  const firstTileY = Math.floor(topLeftPxY / TILE_SIZE);
+  const tilesAcross = Math.ceil(CW / TILE_SIZE) + 2;
+  const tilesDown = Math.ceil(CH / TILE_SIZE) + 2;
+  const maxTile = Math.pow(2, view.zoom);
+  const frag = document.createDocumentFragment();
+  for(let ty=0; ty<=tilesDown; ty++){
+    const yt = firstTileY + ty;
+    if(yt < 0 || yt >= maxTile) continue;
+    for(let tx=0; tx<=tilesAcross; tx++){
+      const rawX = firstTileX + tx;
+      const xt = ((rawX % maxTile) + maxTile) % maxTile; // wrap around antimeridian
+      const img = document.createElement('img');
+      const sub = TILE_SUBDOMAINS[(xt+yt) % TILE_SUBDOMAINS.length];
+      img.src = `https://${sub}.tile.openstreetmap.org/${view.zoom}/${xt}/${yt}.png`;
+      img.alt = '';
+      img.draggable = false;
+      img.style.left = (rawX*TILE_SIZE - topLeftPxX) + 'px';
+      img.style.top = (yt*TILE_SIZE - topLeftPxY) + 'px';
+      img.loading = 'eager';
+      frag.appendChild(img);
+    }
+  }
+  layer.appendChild(frag);
+}
+
+function drawStartPin(){
+  const svg = $('#routeSvg');
+  const old = svg.querySelector('#startPinG');
+  if(old) old.remove();
+  if(state.pinLat==null) return;
+  const p = projectToPx(state.pinLat, state.pinLon);
+  const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+  g.setAttribute('id','startPinG');
+  g.innerHTML = `
+    <circle cx="${p.x}" cy="${p.y}" r="11" fill="none" stroke="#C7F136" stroke-width="2" opacity="0.5"/>
+    <circle cx="${p.x}" cy="${p.y}" r="9" fill="#0F1712" stroke="#C7F136" stroke-width="2.5"/>
+    <circle cx="${p.x}" cy="${p.y}" r="3" fill="#C7F136"/>
+  `;
+  svg.appendChild(g);
+}
+
+function fullRedrawMap(){
+  sizeMap();
+  renderTileLayer();
+  drawStartPin();
+  if(state.routes[state.selectedIdx]) drawRoute(state.routes[state.selectedIdx]);
+}
+
+/* ============================== STREET GRAPH ==============================
+   Real street graph, fetched from OpenStreetMap via the Overpass API, used
+   only for route *generation* — the base map above renders independently
+   of this succeeding. */
+const OVERPASS_ENDPOINTS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
+  'https://overpass.openstreetmap.ru/api/interpreter',
+];
+
+async function buildGraphFromOSM(lat, lon, radiusKm = 1.8){
+  // Positive whitelist, not a blacklist: only ways a runner could actually
+  // use. This deliberately excludes primary/trunk/motorway-class roads
+  // (no pavement, unsafe) even though they're technically "highways" in
+  // OSM terms, and prioritizes dedicated foot/cycle infrastructure.
+  const query = `
+    [out:json][timeout:20];
+    (
+      way["highway"~"^(footway|path|pedestrian|cycleway|bridleway|steps|track|living_street|residential|unclassified|service)$"]["access"!~"private|no"](around:${radiusKm*1000},${lat},${lon});
+      way["foot"~"yes|designated"]["highway"](around:${radiusKm*1000},${lat},${lon});
+    );
+    out body geom;
+  `;
+  let lastErr = null;
+  for(const endpoint of OVERPASS_ENDPOINTS){
+    try{
+      const res = await fetchWithTimeout(endpoint, {
+        method: 'POST',
+        body: 'data=' + encodeURIComponent(query)
+      }, 25000);
+      if(!res.ok) throw new Error(`Overpass returned ${res.status} at ${endpoint}`);
+      const data = await res.json();
+      return await finishGraphFromOverpassData(data);
+    } catch(err){
+      console.warn(`Overpass endpoint failed (${endpoint}):`, err);
+      lastErr = err;
+    }
+  }
+  throw lastErr || new Error('All Overpass endpoints failed');
+}
+
+async function finishGraphFromOverpassData(data){
+  const nodeByKey = new Map();
+  const edges = [];
+  let nid = 0;
+  const getNode = pt => {
+    const key = `${pt.lat.toFixed(6)},${pt.lon.toFixed(6)}`;
+    if(!nodeByKey.has(key)) nodeByKey.set(key, {id: nid++, lat: pt.lat, lon: pt.lon});
+    return nodeByKey.get(key);
+  };
+  data.elements.forEach(way => {
+    if(!way.geometry || way.geometry.length < 2) return;
+    const lit = way.tags?.lit === 'yes';
+    const highway = way.tags?.highway || '';
+    // dedicated, car-free infrastructure — the kind of path a route
+    // generator should actually favor for a runner
+    const dedicated = ['footway','path','pedestrian','cycleway','bridleway','steps','living_street'].includes(highway);
+    for(let i=0;i<way.geometry.length-1;i++){
+      const a = getNode(way.geometry[i]);
+      const b = getNode(way.geometry[i+1]);
+      if(a.id === b.id) continue;
+      const dist = haversineKm(a.lat, a.lon, b.lat, b.lon);
+      edges.push({a: a.id, b: b.id, dist, hill: 0, lit, highway, dedicated});
+    }
+  });
+  const nodes = [...nodeByKey.values()];
+  await attachElevation(nodes, edges);
+  const adj = new Map();
+  nodes.forEach(n => adj.set(n.id, []));
+  edges.forEach(e => {
+    adj.get(e.a).push(e);
+    adj.get(e.b).push({a: e.b, b: e.a, dist: e.dist, hill: e.hill, lit: e.lit, highway: e.highway, dedicated: e.dedicated});
+  });
+  return {nodes, edges, adj};
+}
+
+async function attachElevation(nodes, edges){
+  const elevById = new Map();
+  const chunkSize = 100;
+  for(let i=0;i<nodes.length;i+=chunkSize){
+    const chunk = nodes.slice(i, i+chunkSize);
+    try{
+      const res = await fetchWithTimeout('https://api.open-elevation.com/api/v1/lookup', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({locations: chunk.map(n => ({latitude: n.lat, longitude: n.lon}))})
+      }, 10000);
+      const json = await res.json();
+      json.results.forEach((r, idx) => elevById.set(chunk[idx].id, r.elevation));
+    } catch(err){
+      console.warn('Elevation lookup failed for a batch (routes will use flat terrain for those segments):', err);
+    }
+  }
+  edges.forEach(e => {
+    const ea = elevById.get(e.a), eb = elevById.get(e.b);
+    if(ea==null || eb==null){ e.hill = 0; return; }
+    e.hill = clamp01(Math.abs(ea-eb) / 8);
+  });
+}
+
+// Fallback used only when every Overpass mirror is unreachable. Builds a
+// plausible street grid anchored to real lat/lon around the pin (so it
+// still aligns with the real map tiles), with the same random terrain/
+// lighting distribution the app started with. Clearly flagged as
+// `synthetic` so the UI can tell the user it's approximate, not real.
+function buildSyntheticGraph(centerLat, centerLon){
+  const rng = mulberry32(Date.now() & 0xffffffff);
+  const GRID_N = 14;
+  const spacingKm = 0.22;
+  const latDegPerKm = 1/111.32;
+  const lonDegPerKm = 1/(111.32*Math.cos(centerLat*Math.PI/180));
+  const idx = (r,c)=> r*GRID_N+c;
+  const nodes = [];
+  for(let r=0;r<GRID_N;r++){
+    for(let c=0;c<GRID_N;c++){
+      nodes.push({
+        id: idx(r,c),
+        lat: centerLat + (r-GRID_N/2)*spacingKm*latDegPerKm,
+        lon: centerLon + (c-GRID_N/2)*spacingKm*lonDegPerKm,
+      });
+    }
+  }
+  const edges = [];
+  const isAvenue = (r,c) => (r%3===0 || c%3===0);
+  for(let r=0;r<GRID_N;r++){
+    for(let c=0;c<GRID_N;c++){
+      const baseHill = (Math.sin(r*0.6)+Math.cos(c*0.5))*0.5+0.5;
+      if(c<GRID_N-1){
+        edges.push({a:idx(r,c), b:idx(r,c+1), dist:spacingKm, hill:clamp01(baseHill*0.7+rng()*0.3), lit: isAvenue(r,c)?rng()<0.85:rng()<0.35});
+      }
+      if(r<GRID_N-1){
+        edges.push({a:idx(r,c), b:idx(r+1,c), dist:spacingKm, hill:clamp01(baseHill*0.7+rng()*0.3), lit: isAvenue(r,c)?rng()<0.85:rng()<0.35});
+      }
+    }
+  }
+  const adj = new Map();
+  nodes.forEach(n=>adj.set(n.id, []));
+  edges.forEach(e=>{
+    adj.get(e.a).push(e);
+    adj.get(e.b).push({a:e.b, b:e.a, dist:e.dist, hill:e.hill, lit:e.lit});
+  });
+  return {nodes, edges, adj, synthetic:true};
+}
+
+/* ============================ ROUTING ============================ */
+function edgeCost(e, terrainPref, lightPref){
+  let penalty = 1;
+  if(terrainPref==='flat') penalty += e.hill*2.2;
+  else if(terrainPref==='hilly') penalty += (1-e.hill)*2.2;
+  if(lightPref==='lit' && !e.lit) penalty += 3.5;
+  if(e.dedicated) penalty *= 0.82; // prefer real footways/cycleways/paths over shared roads
+  return e.dist * penalty;
+}
+function weightedWalk(graph, startId, targetKm, terrainPref, lightPref, rng, avoidImmediateBack=true){
+  const path = [startId];
+  const edgesUsed = [];
+  let cur = startId, prev = -1, total = 0, guard = 0;
+  while(total < targetKm && guard++ < 4000){
+    const options = graph.adj.get(cur).filter(e => !(avoidImmediateBack && e.b===prev));
+    if(options.length===0) break;
+    const costs = options.map(e => edgeCost(e, terrainPref, lightPref));
+    const weights = costs.map(c => 1/(c*c));
+    const sum = weights.reduce((a,b)=>a+b,0);
+    let r = rng()*sum, pick = options[0];
+    for(let i=0;i<options.length;i++){ r -= weights[i]; if(r<=0){pick=options[i]; break;} }
+    prev = cur; cur = pick.b; total += pick.dist;
+    path.push(cur); edgesUsed.push(pick);
+  }
+  return {path, edgesUsed, total};
+}
+function shortestPathBack(graph, fromId, toId, terrainPref, lightPref){
+  const dist = new Map(), prevE = new Map(), visited = new Set();
+  graph.nodes.forEach(n=>dist.set(n.id, Infinity));
+  dist.set(fromId, 0);
+  const pq = [[0, fromId]];
+  while(pq.length){
+    pq.sort((a,b)=>a[0]-b[0]);
+    const [d, u] = pq.shift();
+    if(visited.has(u)) continue;
+    visited.add(u);
+    if(u===toId) break;
+    for(const e of graph.adj.get(u)){
+      const nd = d + edgeCost(e, terrainPref, lightPref);
+      if(nd < dist.get(e.b)){ dist.set(e.b, nd); prevE.set(e.b, {from:u, edge:e}); pq.push([nd, e.b]); }
+    }
+  }
+  const edgesUsed = []; let cur = toId;
+  while(cur!==fromId){
+    const rec = prevE.get(cur);
+    if(!rec) return null;
+    edgesUsed.unshift(rec.edge); cur = rec.from;
+  }
+  return {edgesUsed, total: edgesUsed.reduce((s,e)=>s+e.dist,0)};
+}
+function buildRoute(graph, startId, targetKm, terrainPref, lightPref, shape, seed){
+  const rng = mulberry32(seed);
+  if(shape==='out-back'){
+    const {path, edgesUsed, total} = weightedWalk(graph, startId, targetKm/2, terrainPref, lightPref, rng);
+    const back = [...edgesUsed].reverse().map(e=>({a:e.b,b:e.a,dist:e.dist,hill:e.hill,lit:e.lit,highway:e.highway,dedicated:e.dedicated}));
+    return {edgesUsed: edgesUsed.concat(back), total: total*2, path: path.concat([...path].reverse().slice(1))};
+  } else {
+    let {path, edgesUsed, total} = weightedWalk(graph, startId, targetKm*0.82, terrainPref, lightPref, rng);
+    const closing = shortestPathBack(graph, path[path.length-1], startId, terrainPref, lightPref);
+    if(closing){ edgesUsed = edgesUsed.concat(closing.edgesUsed); total += closing.total; }
+    return {edgesUsed, total, path};
+  }
+}
+function scoreRoute(edgesUsed, targetKm){
+  return Math.abs(edgesUsed.reduce((s,e)=>s+e.dist,0) - targetKm);
+}
+function generateCandidates(){
+  const graph = state.graph;
+  const startId = state.startNode ?? 0;
+  const candidates = [];
+  for(let i=0;i<6;i++){
+    const seed = (Date.now()+i*97) & 0xffffffff;
+    const r = buildRoute(graph, startId, state.distanceKm, state.terrain, state.light, state.shape, seed);
+    if(r.edgesUsed.length>0) candidates.push(r);
+  }
+  candidates.sort((a,b)=> scoreRoute(a.edgesUsed,state.distanceKm) - scoreRoute(b.edgesUsed,state.distanceKm));
+  return candidates.slice(0,3);
+}
+function findNearestNode(lat, lon){
+  let best=null, bestD=Infinity;
+  state.graph.nodes.forEach(n=>{
+    const d = haversineKm(lat, lon, n.lat, n.lon);
+    if(d<bestD){bestD=d; best=n.id;}
+  });
+  return best;
+}
+
+/* ============================ ROUTE / STATS RENDERING ============================ */
+function drawRoute(route){
+  const svg = $('#routeSvg');
+  svg.querySelectorAll('.route-el').forEach(n=>n.remove());
+  const pts = [];
+  let cur = state.startNode;
+  pts.push(nodePx(state.graph.nodes[cur]));
+  route.edgesUsed.forEach(e=>{ cur = e.b; pts.push(nodePx(state.graph.nodes[cur])); });
+
+  let d = `M ${pts[0].x} ${pts[0].y}`;
+  pts.slice(1).forEach(p=> d += ` L ${p.x} ${p.y}`);
+
+  const glow = document.createElementNS('http://www.w3.org/2000/svg','path');
+  glow.setAttribute('class','route-el'); glow.setAttribute('d', d); glow.setAttribute('fill','none');
+  glow.setAttribute('stroke', '#C7F136'); glow.setAttribute('stroke-width', '7'); glow.setAttribute('stroke-opacity', '0.22');
+  glow.setAttribute('stroke-linecap','round'); glow.setAttribute('stroke-linejoin','round');
+  svg.appendChild(glow);
+
+  const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+  path.setAttribute('class','route-el'); path.setAttribute('d', d); path.setAttribute('fill','none');
+  path.setAttribute('stroke', '#C7F136'); path.setAttribute('stroke-width', '3.5');
+  path.setAttribute('stroke-linecap','round'); path.setAttribute('stroke-linejoin','round');
+  const len = pts.length*40+200;
+  path.style.strokeDasharray = len; path.style.strokeDashoffset = len;
+  path.style.transition = 'stroke-dashoffset 1.1s ease-out';
+  svg.appendChild(path);
+  requestAnimationFrame(()=> requestAnimationFrame(()=> path.style.strokeDashoffset = 0));
+
+  route.edgesUsed.forEach((e,i)=>{
+    if(e.lit){
+      const na = state.graph.nodes[i===0?state.startNode:route.edgesUsed[i-1].b];
+      const nb = state.graph.nodes[e.b];
+      const pa = nodePx(na), pb = nodePx(nb);
+      const dot = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      dot.setAttribute('class','route-el');
+      dot.setAttribute('cx',(pa.x+pb.x)/2); dot.setAttribute('cy',(pa.y+pb.y)/2); dot.setAttribute('r','1.8');
+      dot.setAttribute('fill','#5FA6D6');
+      svg.appendChild(dot);
+    }
+  });
+
+  const last = pts[pts.length-1];
+  const fin = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  fin.setAttribute('class','route-el'); fin.setAttribute('cx', last.x); fin.setAttribute('cy', last.y); fin.setAttribute('r','5');
+  fin.setAttribute('fill','#E8632F');
+  svg.appendChild(fin);
+
+  drawStartPin(); // keep pin on top of the newly-drawn route
+}
+
+function drawElevation(route){
+  const svg = $('#elevSvg');
+  svg.innerHTML='';
+  let elev = 0; const vals=[0];
+  route.edgesUsed.forEach((e,i)=>{
+    const sign = Math.sin(i*1.7)>0?1:-1;
+    elev += sign*e.hill*14;
+    vals.push(elev);
+  });
+  const min = Math.min(...vals), max = Math.max(...vals);
+  const range = (max-min)||1;
+  const w=400,h=60,pad=4;
+  let d = `M 0 ${h-pad-((vals[0]-min)/range)*(h-2*pad)}`;
+  vals.forEach((v,i)=>{
+    const x = (i/(vals.length-1))*w;
+    const y = h-pad-((v-min)/range)*(h-2*pad);
+    d += ` L ${x.toFixed(1)} ${y.toFixed(1)}`;
+  });
+  const areaPath = document.createElementNS('http://www.w3.org/2000/svg','path');
+  areaPath.setAttribute('d', d + ` L ${w} ${h} L 0 ${h} Z`);
+  areaPath.setAttribute('fill', 'rgba(232,99,47,0.15)');
+  svg.appendChild(areaPath);
+  const linePath = document.createElementNS('http://www.w3.org/2000/svg','path');
+  linePath.setAttribute('d', d); linePath.setAttribute('fill','none');
+  linePath.setAttribute('stroke','#E8632F'); linePath.setAttribute('stroke-width','1.6');
+  svg.appendChild(linePath);
+}
+
+function computeStats(route){
+  const totalKm = route.edgesUsed.reduce((s,e)=>s+e.dist,0);
+  const litKm = route.edgesUsed.filter(e=>e.lit).reduce((s,e)=>s+e.dist,0);
+  const gainM = route.edgesUsed.reduce((s,e)=> s + Math.max(0, e.hill-0.4)*e.dist*90, 0);
+  const paceMinPerKm = state.pace.min + state.pace.sec/60;
+  return { totalKm, litPct: totalKm>0 ? Math.round((litKm/totalKm)*100) : 0, gainM: Math.round(gainM), timeMin: totalKm*paceMinPerKm };
+}
+function renderStats(route){
+  const s = computeStats(route);
+  $('#readout').style.display='grid';
+  $('#statDist').textContent = fmtDist(s.totalKm);
+  $('#statElev').textContent = state.unit==='km' ? `${s.gainM} m` : `${Math.round(s.gainM*3.281)} ft`;
+  $('#statTime').textContent = fmtTime(s.timeMin);
+  $('#statLit').textContent = `${s.litPct}%`;
+  $('#elevWrap').style.display='block';
+  drawElevation(route);
+  $('#mapCaption').style.display='block';
+  $('#mapCaption').textContent = `${state.terrain} · ${state.light==='lit'?'well-lit preferred':'lighting not filtered'} · ${state.shape==='loop'?'loop':'out & back'}${state.graph?.synthetic ? ' · approximate streets' : ''}`;
+
+  // Route-ready banner: clear, high-visibility confirmation the moment a
+  // route is calibrated, with the key facts summarized in one line.
+  const shapeLabel = state.shape==='loop' ? 'loop' : 'out & back';
+  const approxNote = state.graph?.synthetic ? ' (approximate streets)' : '';
+  $('#rbTitle').textContent = `Route ${String.fromCharCode(65+state.selectedIdx)} ready`;
+  $('#rbSub').textContent = `${fmtDist(s.totalKm)} ${shapeLabel} · ${state.terrain} · ${s.litPct}% lit${approxNote}`;
+  $('#routeBanner').classList.add('show');
+
+  // restart the staggered stat-cell entrance animation every time (even if
+  // the panel was already visible from a previous route)
+  document.querySelectorAll('#readout .cell').forEach(c=>{
+    c.style.animation = 'none';
+    void c.offsetHeight; // force reflow so the animation can replay
+    c.style.animation = '';
+  });
+}
+function renderOptions(){
+  const wrap = $('#optionsList');
+  wrap.innerHTML='';
+  $('#optionsWrap').style.display='block';
+  state.routes.forEach((r,i)=>{
+    const s = computeStats(r);
+    const card = document.createElement('div');
+    card.className = 'option-card'+(i===state.selectedIdx?' selected':'');
+    card.tabIndex = 0;
+    card.innerHTML = `
+      <div class="name">Route ${String.fromCharCode(65+i)}</div>
+      <div class="meta"><span>${fmtDist(s.totalKm)}</span><span>${s.litPct}% lit</span></div>
+      <div class="meta" style="margin-top:4px;"><span>${state.unit==='km'?s.gainM+' m gain':Math.round(s.gainM*3.281)+' ft gain'}</span><span>${fmtTime(s.timeMin)}</span></div>
+    `;
+    card.addEventListener('click', ()=> selectRoute(i));
+    card.addEventListener('keydown', e=>{ if(e.key==='Enter') selectRoute(i); });
+    wrap.appendChild(card);
+  });
+}
+function selectRoute(i){
+  state.selectedIdx = i;
+  drawRoute(state.routes[i]);
+  renderStats(state.routes[i]);
+  renderOptions();
+}
+
+/* ============================ START POINT / GRAPH LOADING ============================ */
+function setStreetStatus(mode, text){
+  const el = $('#streetStatus');
+  el.className = 'street-status' + (mode==='ok' ? ' ok' : mode==='err' ? ' err' : '');
+  el.style.display = 'flex';
+  $('#streetStatusText').textContent = text;
+}
+
+// Called from click / GPS / address search alike. Shows the map + pin
+// immediately (tile imagery + SVG pin don't depend on any of this
+// succeeding), then loads the real street graph in the background so
+// "Find me a route" has real data once it's ready.
+async function setStartPoint(lat, lon, opts={}){
+  state.pinLat = lat; state.pinLon = lon;
+  view.lat = lat; view.lon = lon; view.set = true;
+  state.graph = null; state.graphStatus = 'loading'; state.startNode = null;
+  state.routes = []; state.selectedIdx = 0;
+  $('#readout').style.display='none';
+  $('#elevWrap').style.display='none';
+  $('#optionsWrap').style.display='none';
+  $('#mapCaption').style.display='none';
+  $('#routeBanner').classList.remove('show');
+
+  $('#mapEmpty').style.display = 'none';
+  hideMapError();
+  fullRedrawMap();
+  setStreetStatus('loading', 'Loading nearby streets…');
+  if(opts.toastMsg) toast(opts.toastMsg);
+
+  try{
+    const graph = await buildGraphFromOSM(lat, lon);
+    if(graph.nodes.length === 0){
+      // Overpass answered but had nothing mapped here (rural spot, etc.) —
+      // fall back to an approximate grid rather than dead-ending.
+      useSyntheticFallback(lat, lon, 'No mapped streets found here');
+      return;
+    }
+    state.graph = graph;
+    state.startNode = findNearestNode(lat, lon);
+    state.graphStatus = 'ready';
+    setStreetStatus('ok', 'Streets ready');
+  } catch(err){
+    console.error('Failed to load street graph (all endpoints):', err);
+    useSyntheticFallback(lat, lon, err.name === 'AbortError' ? 'Live street data timed out' : "Couldn't reach live street data");
+  }
+}
+
+// Used whenever real OpenStreetMap data can't be fetched (all Overpass
+// mirrors failed, or nothing was mapped nearby). Keeps the app fully
+// functional — route generation, filters, and stats all still work — just
+// against an approximate rather than a real street layout.
+function useSyntheticFallback(lat, lon, reason){
+  state.graph = buildSyntheticGraph(lat, lon);
+  state.startNode = findNearestNode(lat, lon);
+  state.graphStatus = 'approx';
+  setStreetStatus('approx', `${reason} — using approximate streets`);
+}
+
+function showMapError(title, detail){
+  const box = $('#mapError');
+  box.innerHTML = `<strong>${title}</strong><span>${detail}</span>`;
+  const retry = document.createElement('button');
+  retry.textContent = 'Try again';
+  retry.addEventListener('click', ()=>{
+    box.style.display = 'none';
+    if(state.pinLat!=null) setStartPoint(state.pinLat, state.pinLon);
+  });
+  box.appendChild(retry);
+  box.style.display = 'flex';
+}
+function hideMapError(){ $('#mapError').style.display = 'none'; }
+
+/* ============================ EVENTS ============================ */
+function updateDistanceDisplay(){
+  const v = state.unit==='km' ? state.distanceKm : km2mi(state.distanceKm);
+  $('#distValue').textContent = v.toFixed(1);
+  $('#distUnitLabel').textContent = state.unit;
+}
+$('#distSlider').addEventListener('input', e=>{
+  const raw = parseFloat(e.target.value);
+  state.distanceKm = state.unit==='km' ? raw : mi2km(raw);
+  updateDistanceDisplay();
+});
+$('#unitKm').addEventListener('click', ()=>setUnit('km'));
+$('#unitMi').addEventListener('click', ()=>setUnit('mi'));
+function setUnit(u){
+  state.unit = u;
+  $('#unitKm').classList.toggle('active', u==='km');
+  $('#unitMi').classList.toggle('active', u==='mi');
+  const slider = $('#distSlider');
+  if(u==='km'){ slider.min=1; slider.max=30; slider.step=0.5; slider.value=state.distanceKm; }
+  else { slider.min=0.6; slider.max=18.6; slider.step=0.3; slider.value=km2mi(state.distanceKm); }
+  $('#paceUnit').textContent = u==='km' ? 'min / km' : 'min / mi';
+  updateDistanceDisplay();
+}
+document.querySelectorAll('.quickset button').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    state.distanceKm = parseFloat(b.dataset.v);
+    $('#distSlider').value = state.unit==='km'?state.distanceKm:km2mi(state.distanceKm);
+    updateDistanceDisplay();
+  });
+});
+document.querySelectorAll('#terrainChips .chip').forEach(c=>{
+  c.addEventListener('click', ()=>{
+    document.querySelectorAll('#terrainChips .chip').forEach(x=>x.classList.remove('active'));
+    c.classList.add('active'); state.terrain = c.dataset.val;
+  });
+});
+document.querySelectorAll('#lightChips .chip').forEach(c=>{
+  c.addEventListener('click', ()=>{
+    document.querySelectorAll('#lightChips .chip').forEach(x=>x.classList.remove('active'));
+    c.classList.add('active'); state.light = c.dataset.val;
+  });
+});
+document.querySelectorAll('#shapeChips .chip').forEach(c=>{
+  c.addEventListener('click', ()=>{
+    document.querySelectorAll('#shapeChips .chip').forEach(x=>x.classList.remove('active'));
+    c.classList.add('active'); state.shape = c.dataset.val;
+  });
+});
+$('#paceMin').addEventListener('change', e=> state.pace.min = parseInt(e.target.value)||6);
+$('#paceSec').addEventListener('change', e=> state.pace.sec = parseInt(e.target.value)||0);
+
+// ---- start point: geolocation ----
+// Keeps a light-green outline on whichever start-point method was last
+// used, so it's clear at a glance how the current pin was set.
+function setActiveStartMethod(method){
+  $('#useLocationBtn').classList.toggle('active', method === 'location');
+  $('#dropPinBtn').classList.toggle('active', method === 'pin');
+}
+
+$('#useLocationBtn').addEventListener('click', ()=>{
+  if(!navigator.geolocation){ toast("Geolocation isn't available in this browser."); return; }
+  if(window.isSecureContext === false){
+    showMapError('Location needs a secure page', 'Your browser only allows GPS access on https:// or localhost pages. Try serving this file locally (e.g. "python3 -m http.server") instead of opening it directly.');
+    return;
+  }
+  toast('Locating you…');
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const {latitude, longitude} = pos.coords;
+    const badge = $('#locBadge');
+    badge.style.display='inline-block';
+    badge.textContent = `Located ${latitude.toFixed(3)}°, ${longitude.toFixed(3)}°`;
+    setActiveStartMethod('location');
+    setStartPoint(latitude, longitude, {toastMsg:'Start point set to your location'});
+  }, err=>{
+    let msg = "Couldn't get your location — try dropping a pin instead.";
+    if(err.code === err.PERMISSION_DENIED) msg = "Location permission was denied. Allow it in your browser's site settings, or drop a pin instead.";
+    else if(err.code === err.TIMEOUT) msg = 'Location request timed out — try again.';
+    toast(msg);
+  }, {enableHighAccuracy:true, timeout:10000, maximumAge:60000});
+});
+
+// ---- start point: click-to-place pin ----
+$('#dropPinBtn').addEventListener('click', ()=>{
+  state.placingPin = !state.placingPin;
+  $('#dropPinBtn').classList.toggle('active', state.placingPin);
+  $('#mapHint').style.display = state.placingPin ? 'block' : 'none';
+  if(state.placingPin) toast('Click anywhere on the map to set your start point');
+});
+$('#mapWrap').addEventListener('click', e=>{
+  // ignore clicks on the search bar / buttons / error overlay
+  if(e.target.closest('.map-searchbar') || e.target.closest('.map-error')) return;
+  const rect = e.currentTarget.getBoundingClientRect();
+  const x = e.clientX-rect.left, y = e.clientY-rect.top;
+  const {lat, lon} = view.set ? unprojectFromPx(x,y) : (()=>{
+    // no view yet: fall back to a neutral default center so a first click
+    // anywhere on the empty map still works and is genuinely acknowledged
+    view.lat = 51.5074; view.lon = -0.1278; view.zoom = 16; view.set = true; sizeMap();
+    return unprojectFromPx(x,y);
+  })();
+  state.placingPin = false;
+  $('#mapHint').style.display = 'none';
+  $('#locBadge').style.display = 'none';
+  setActiveStartMethod('pin');
+  setStartPoint(lat, lon, {toastMsg:'Start point set'});
+});
+
+// ---- start point: address / postcode search, with live autocomplete ----
+const searchState = { suggestions: [], highlighted: -1, lastQuery: '' };
+
+async function fetchSuggestions(query){
+  const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=6&q=${encodeURIComponent(query)}`;
+  const res = await fetchWithTimeout(url, {headers:{'Accept':'application/json'}}, 8000);
+  if(!res.ok) throw new Error(`Nominatim returned ${res.status}`);
+  return res.json();
+}
+
+function renderSuggestions(results){
+  const box = $('#addressSuggestions');
+  searchState.suggestions = results;
+  searchState.highlighted = -1;
+  if(!results || results.length === 0){
+    box.innerHTML = `<div class="sug-empty">No matches — try a different search, or click the map instead</div>`;
+    box.classList.add('show');
+    return;
+  }
+  box.innerHTML = results.map((r,i) => {
+    const parts = r.display_name.split(',');
+    const main = parts[0];
+    const sub = parts.slice(1,3).join(',').trim();
+    return `<div class="sug-item" data-idx="${i}"><span class="main">${escapeHtml(main)}</span><span class="sub">${escapeHtml(sub)}</span></div>`;
+  }).join('');
+  box.classList.add('show');
+  box.querySelectorAll('.sug-item').forEach(el=>{
+    el.addEventListener('click', ()=> chooseSuggestion(parseInt(el.dataset.idx)));
+  });
+}
+function escapeHtml(s){
+  const d = document.createElement('div'); d.textContent = s; return d.innerHTML;
+}
+function hideSuggestions(){
+  $('#addressSuggestions').classList.remove('show');
+  searchState.suggestions = []; searchState.highlighted = -1;
+}
+function chooseSuggestion(i){
+  const r = searchState.suggestions[i];
+  if(!r) return;
+  $('#addressInput').value = r.display_name.split(',').slice(0,2).join(',');
+  hideSuggestions();
+  $('#locBadge').style.display = 'none';
+  setActiveStartMethod(null);
+  setStartPoint(parseFloat(r.lat), parseFloat(r.lon), {toastMsg: `Start point set to ${r.display_name.split(',').slice(0,2).join(',')}`});
+}
+function debounce(fn, ms){
+  let t;
+  return (...args) => { clearTimeout(t); t = setTimeout(()=>fn(...args), ms); };
+}
+const debouncedSuggest = debounce(async (q)=>{
+  if(q.length < 3){ hideSuggestions(); return; }
+  try{
+    const results = await fetchSuggestions(q);
+    // ignore stale responses if the user kept typing
+    if($('#addressInput').value.trim() !== q) return;
+    renderSuggestions(results);
+  } catch(err){
+    console.warn('Address autocomplete failed:', err);
+    // fail quietly — the Search button/Enter still works as a direct fallback
+  }
+}, 350);
+
+$('#addressInput').addEventListener('input', e=>{
+  const q = e.target.value.trim();
+  searchState.lastQuery = q;
+  debouncedSuggest(q);
+});
+$('#addressInput').addEventListener('keydown', e=>{
+  const items = $('#addressSuggestions').querySelectorAll('.sug-item');
+  if(e.key === 'ArrowDown' && items.length){
+    e.preventDefault();
+    searchState.highlighted = Math.min(searchState.highlighted+1, items.length-1);
+    items.forEach((el,i)=>el.classList.toggle('highlighted', i===searchState.highlighted));
+  } else if(e.key === 'ArrowUp' && items.length){
+    e.preventDefault();
+    searchState.highlighted = Math.max(searchState.highlighted-1, 0);
+    items.forEach((el,i)=>el.classList.toggle('highlighted', i===searchState.highlighted));
+  } else if(e.key === 'Enter'){
+    e.preventDefault();
+    if(searchState.highlighted >= 0 && searchState.suggestions[searchState.highlighted]){
+      chooseSuggestion(searchState.highlighted);
+    } else {
+      runAddressSearch();
+    }
+  } else if(e.key === 'Escape'){
+    hideSuggestions();
+  }
+});
+document.addEventListener('click', e=>{
+  if(!e.target.closest('.search-field')) hideSuggestions();
+});
+
+async function runAddressSearch(){
+  const input = $('#addressInput');
+  const q = input.value.trim();
+  if(!q){ toast('Type an address or postcode first'); return; }
+  hideSuggestions();
+  toast('Searching…');
+  try{
+    const results = await fetchSuggestions(q);
+    if(!results.length){ toast("Couldn't find that address — try being more specific"); return; }
+    const r = results[0];
+    $('#locBadge').style.display = 'none';
+    setActiveStartMethod(null);
+    setStartPoint(parseFloat(r.lat), parseFloat(r.lon), {toastMsg: `Start point set to ${r.display_name.split(',').slice(0,2).join(',')}`});
+  } catch(err){
+    console.error('Geocoding failed:', err);
+    toast("Couldn't search right now — try again in a moment, or click the map instead");
+  }
+}
+$('#addressSearchBtn').addEventListener('click', runAddressSearch);
+
+// ---- generate ----
+$('#generateBtn').addEventListener('click', runGenerate);
+async function runGenerate(){
+  if(state.pinLat==null){ toast('Set a start point first — search an address, use your location, or click the map.'); return; }
+  if(state.graphStatus === 'loading'){ toast('Streets are still loading — try again in a moment.'); return; }
+  if(state.graphStatus !== 'ready' && state.graphStatus !== 'approx'){
+    // shouldn't normally happen (setStartPoint always resolves to ready or
+    // approx now), but retry from scratch just in case
+    await setStartPoint(state.pinLat, state.pinLon);
+  }
+  const candidates = generateCandidates();
+  if(candidates.length===0){ toast("Couldn't find a route with those filters — try loosening them."); return; }
+  state.routes = candidates;
+  state.selectedIdx = 0;
+  drawRoute(candidates[0]);
+  renderStats(candidates[0]);
+  renderOptions();
+  toast(`Found ${candidates.length} route option${candidates.length>1?'s':''}`);
+}
+
+// ---- init ----
+window.addEventListener('resize', ()=>{ if(view.set) fullRedrawMap(); });
+updateDistanceDisplay();
+</script>
+</body>
+</html>
