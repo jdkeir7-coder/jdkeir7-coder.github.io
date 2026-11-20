@@ -333,6 +333,31 @@
     .results-stage .share-status{width:auto!important;min-width:0;flex:1;margin:0!important;min-height:0!important;font-size:9px!important;font-weight:900;letter-spacing:.65px;line-height:1.3;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#ffdbc8}
     @media(max-width:620px){.results-stage #resultsPanel{max-width:min(calc(100vw - 24px), calc(80dvh - 125px))!important}.result-icon-toolbar{min-height:38px;gap:9px}.result-icon-button{width:38px;height:38px}.result-icon-button svg{width:18px;height:18px}}
     @media(prefers-reduced-motion:reduce){.result-icon-button{transition:none!important}}
+
+    /* Airport split-flap motion, made from the existing square LED pixels. */
+    .matrix-pixel.flip-pixel,.mini-matrix-pixel.flip-pixel{
+      position:relative;background:transparent!important;opacity:1!important;
+      transform-style:preserve-3d;box-shadow:none!important;
+      animation:ledTileFlip 355ms cubic-bezier(.24,.82,.31,1) both;
+      animation-delay:var(--flip-delay,0ms);
+    }
+    .matrix-pixel.flip-pixel::before,.matrix-pixel.flip-pixel::after,
+    .mini-matrix-pixel.flip-pixel::before,.mini-matrix-pixel.flip-pixel::after{
+      content:"";position:absolute;inset:0;border-radius:inherit;
+      backface-visibility:hidden;background:#51584c;opacity:.23;
+    }
+    .matrix-pixel.flip-pixel::after,.mini-matrix-pixel.flip-pixel::after{transform:rotateX(180deg)}
+    .matrix-pixel.flip-pixel.new-lit::after{background:#f5f92d;opacity:1;box-shadow:0 0 .2cqw #fbff65,0 0 1.1cqw #daec3275}
+    .matrix-pixel.flip-pixel.old-lit::before{background:#f5f92d;opacity:1;box-shadow:0 0 .2cqw #fbff65,0 0 1.1cqw #daec3275}
+    .mini-matrix-pixel.flip-pixel.new-lit::after{background:#f0f827;opacity:1;box-shadow:0 0 3px #eeff4c9c}
+    .mini-matrix-pixel.flip-pixel.old-lit::before{background:#f0f827;opacity:1;box-shadow:0 0 3px #eeff4c9c}
+    @keyframes ledTileFlip{
+      0%{transform:perspective(170px) rotateX(0deg)}
+      47%{transform:perspective(170px) rotateX(84deg)}
+      53%{transform:perspective(170px) rotateX(96deg)}
+      100%{transform:perspective(170px) rotateX(180deg)}
+    }
+    @media(prefers-reduced-motion:reduce){.flip-pixel{animation:none!important}}
 </style>
 </head>
 <body>
@@ -10193,7 +10218,7 @@ function showPanel(id){switchStage(id==='homePanel'?'home':id==='gamePanel'?'gam
 let runnerAt=0,runnerMotion=0;
 function positionRunner(percent){const line=byId('lane0');const path=byId('progressPath');path.setAttribute('stroke-dasharray',`${percent} ${100-percent}`);const pos=line.getPointAtLength(line.getTotalLength()*percent/100);byId('runner').setAttribute('transform',`translate(${pos.x} ${pos.y})`);byId('spriteFacing').setAttribute('transform',percent>48&&percent<97?'scale(-1 1)':'');}
 function moveRunner(metres,animated=false){
-  renderMiniClock(metres);const goal=Math.max(0,Math.min(100,metres/800*100));cancelAnimationFrame(runnerMotion);
+  renderMiniClock(metres,animated);const goal=Math.max(0,Math.min(100,metres/800*100));cancelAnimationFrame(runnerMotion);
   if(!animated||matchMedia('(prefers-reduced-motion: reduce)').matches){runnerAt=goal;positionRunner(goal);return;}
   const from=runnerAt,start=performance.now(),duration=Math.max(450,Math.min(950,530+Math.abs(goal-from)*12));
   function step(now){const t=Math.min(1,(now-start)/duration),ease=1-Math.pow(1-t,3);runnerAt=from+(goal-from)*ease;positionRunner(runnerAt);if(t<1)runnerMotion=requestAnimationFrame(step);}
@@ -10337,29 +10362,56 @@ const MATRIX_DIGITS={
   '9':['01110','10001','10001','01111','00001','00001','11110']
 };
 function scoreboardDigits(value){return String(Math.max(0,Math.min(800,Math.round(Number(value)||0)))).padStart(3,'0');}
-function renderMiniClock(value){
+// Each dot is a two-sided split-flap tile: old face rotates away and the new
+// illuminated/dark square rotates into place. Screen readers get the final score
+// immediately, and reduced-motion users get a static result.
+const flipMotionEnabled=()=>!window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function buildFlippingPixel(kind,oldOn,newOn,delay,animate){
+  const pixel=document.createElement('i');
+  pixel.className=kind+(newOn?' is-lit':'');
+  if(animate){
+    pixel.classList.add('flip-pixel');
+    if(oldOn)pixel.classList.add('old-lit');
+    if(newOn)pixel.classList.add('new-lit');
+    pixel.style.setProperty('--flip-delay',Math.round(delay)+'ms');
+  }
+  return pixel;
+}
+function renderMiniClock(value,animated=false){
   const target=byId('raceClockDigits');if(!target)return;
-  const digits=scoreboardDigits(value);
-  target.replaceChildren();
+  const digits=scoreboardDigits(value),previous=target.dataset.digits||'000';
+  const flip=!!animated&&flipMotionEnabled()&&previous!==digits;
   const fragment=document.createDocumentFragment();
-  for(const char of digits){
+  for(let d=0;d<3;d++){
     const glyph=document.createElement('span');glyph.className='mini-matrix-character';
-    for(const row of MATRIX_DIGITS[char])for(const bit of row){
-      const px=document.createElement('i');px.className='mini-matrix-pixel'+(bit==='1'?' is-lit':'');glyph.append(px);
+    for(let row=0;row<7;row++)for(let col=0;col<5;col++){
+      const newOn=MATRIX_DIGITS[digits[d]][row][col]==='1';
+      const oldOn=MATRIX_DIGITS[previous[d]][row][col]==='1';
+      const tileChanges=oldOn!==newOn;
+      const delay=35+d*105+row*18+col*12;
+      glyph.appendChild(buildFlippingPixel('mini-matrix-pixel',oldOn,newOn,delay,flip&&tileChanges));
     }
     fragment.appendChild(glyph);
   }
-  target.appendChild(fragment);
+  target.replaceChildren(fragment);target.dataset.digits=digits;
   byId('raceClock').setAttribute('aria-label','Score '+Math.round(Number(value)||0)+' out of 800 metres');
 }
-function renderMatrixScore(value){
-  const target=byId('posterScore');target.replaceChildren();
-  const digits=scoreboardDigits(value);target.setAttribute('aria-label',Number(value)+' metres out of 800');
+function renderMatrixScore(value,animated=false){
+  const target=byId('posterScore'),digits=scoreboardDigits(value);
+  const flip=!!animated&&flipMotionEnabled();
   const fragment=document.createDocumentFragment();
-  for(const char of digits){const glyph=document.createElement('span');glyph.className='matrix-character';glyph.setAttribute('aria-hidden','true');
-    for(const row of MATRIX_DIGITS[char])for(const bit of row){const px=document.createElement('i');px.className='matrix-pixel'+(bit==='1'?' is-lit':'');glyph.append(px);}
-    fragment.append(glyph);
-  }target.append(fragment);
+  for(let d=0;d<3;d++){
+    const glyph=document.createElement('span');glyph.className='matrix-character';glyph.setAttribute('aria-hidden','true');
+    for(let row=0;row<7;row++)for(let col=0;col<5;col++){
+      const newOn=MATRIX_DIGITS[digits[d]][row][col]==='1';
+      // A dark old face gives every LED tile an individual "arrival board" reveal.
+      const delay=780+d*160+row*27+col*17;
+      glyph.appendChild(buildFlippingPixel('matrix-pixel',false,newOn,delay,flip));
+    }
+    fragment.appendChild(glyph);
+  }
+  target.replaceChildren(fragment);
+  target.setAttribute('aria-label',Number(value)+' metres out of 800');
 }
 function paintMatrixCanvas(ctx,value,x,y,pixel,gap,digitSpace){
   const digits=scoreboardDigits(value),digitW=5*pixel+4*gap,totalW=3*digitW+2*digitSpace;
@@ -10376,7 +10428,7 @@ function renderSharePoster(result){
   byId('posterDay').textContent=readableDate(result.date);byId('posterMode').textContent='DAILY HEAT'+' · 800M';
   byId('resultsDayLabel').textContent='DAILY'+' · '+readableDate(result.date);
   byId('posterTitle').innerHTML=scoreHeadline(result.total);
-  renderMatrixScore(result.total);
+  renderMatrixScore(result.total,true);
   const rounds=(result.answers||[]).slice(0,8);
   const hits=rounds.filter(x=>x.points>0).length,rare=rounds.filter(x=>x.points>=70).length;
   byId('posterCorrect').textContent=hits+'/8';byId('posterRare').textContent=rare;
