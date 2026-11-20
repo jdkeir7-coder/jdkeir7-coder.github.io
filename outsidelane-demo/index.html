@@ -458,6 +458,80 @@
 .poster-bottom .poster-tagline{font-weight:850;letter-spacing:.02em;color:#ffe1d2}
 .poster-bottom .poster-tagline em{font-style:italic;font-weight:1000;color:#fff;font-size:1.18em}
 @media(prefers-reduced-motion:reduce){.matrix-pixel.score-dot-reveal{animation:none!important}}
+
+/* Keyboard-first mobile race: keep the question and answer above the OS keyboard. */
+.mobile-score-chip{display:none}
+@media(max-width:700px) and (pointer:coarse){
+  .app{height:var(--mobile-visible-height,100dvh)}
+  .app.keyboard-open{padding:5px 8px 0!important;overflow:hidden}
+  .app.keyboard-open>.top{min-height:28px!important;height:28px!important;margin-bottom:4px!important}
+  .app.keyboard-open .brand{font-size:14px;gap:7px}
+  .app.keyboard-open .brand-badge{width:27px;height:27px;border-radius:8px;font-size:12px}
+  .app.keyboard-open .top-right{display:none}
+  .app.keyboard-open .stage-window{flex:1;min-height:0}
+  .app.keyboard-open .game-stage{padding:1px 3px 5px!important;gap:0!important;overflow:hidden;align-items:stretch}
+  .app.keyboard-open .game-stage #raceCard{display:none!important}
+  .app.keyboard-open .game-stage main{display:flex!important;flex:1 1 auto!important;min-height:0!important;width:100%!important}
+  .app.keyboard-open .game-stage #gamePanel{
+    width:100%;height:100%;flex:1 1 auto!important;min-height:0!important;
+    overflow-y:auto!important;overscroll-behavior:contain;
+    border-radius:13px;padding:10px 12px 7px!important;
+    display:flex!important;flex-direction:column;gap:0;
+    -webkit-overflow-scrolling:touch;
+  }
+  .app.keyboard-open .game-stage #gamePanel .question-top{order:0;gap:8px;flex:none}
+  .app.keyboard-open .game-stage #gamePanel .question-top .count-label{font-size:10px;letter-spacing:.65px;white-space:nowrap}
+  .app.keyboard-open .game-stage #mobileScoreChip{
+    display:inline-flex;align-items:center;justify-content:center;
+    margin-left:auto;padding:3px 8px;border:1px solid #eeb7a1;
+    background:#6c2827;color:#ffe9c9;border-radius:7px;
+    font:900 12px/1.25 ui-monospace,SFMono-Regular,monospace;white-space:nowrap
+  }
+  .app.keyboard-open .game-stage #gamePanel .question-top .timer{font-size:24px;line-height:1.15;margin:0}
+  .app.keyboard-open .game-stage #gamePanel .timer-bar{order:1;flex:none;margin:6px 0 10px!important;height:5px}
+  .app.keyboard-open .game-stage #topicLabel{order:2;font-size:9px;letter-spacing:1.1px;flex:none}
+  .app.keyboard-open .game-stage #questionText{
+    order:3;flex:none;font-size:clamp(17px,4.8vw,21px)!important;line-height:1.17!important;
+    letter-spacing:-.5px;margin:5px 0 7px!important
+  }
+  .app.keyboard-open .game-stage #questionDesc{
+    order:4;flex:none;font-size:11px!important;line-height:1.3!important;
+    margin:0 0 3px!important
+  }
+  .app.keyboard-open .game-stage #sourceLink{order:5;display:none!important}
+  .app.keyboard-open .game-stage #feedback{order:6;flex:none}
+  .app.keyboard-open .game-stage #nextButton{order:7;flex:none}
+  .app.keyboard-open .game-stage #answerSuggestions{
+    order:8;flex:0 1 auto;min-height:0;max-height:100px;overflow-y:auto;
+    margin:5px 0 3px!important;padding:6px!important;gap:5px
+  }
+  .app.keyboard-open .game-stage #answerSuggestions .suggestion{min-height:30px;padding:6px 9px!important;font-size:11px}
+  .app.keyboard-open .game-stage #answerSuggestions .suggestions-hint{display:none}
+  .app.keyboard-open .game-stage #validationMessage{
+    order:9;flex:none;min-height:0!important;margin:3px 0!important;
+    font-size:11px;line-height:1.22
+  }
+  .app.keyboard-open .game-stage #answerForm{
+    order:10;position:sticky;bottom:0;z-index:5;flex:0 0 auto;
+    display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important;
+    gap:7px;margin:auto 0 0!important;padding:7px 0 0!important;
+    background:#a0453b
+  }
+  .app.keyboard-open .game-stage #answerInput{
+    min-width:0;min-height:46px!important;flex:1 1 0!important;
+    padding:10px 11px!important;font-size:16px!important;border-radius:10px
+  }
+  .app.keyboard-open .game-stage #submitAnswer{
+    width:auto!important;flex:0 0 93px!important;min-height:46px!important;
+    padding:9px 8px!important;font-size:12px!important;border-radius:10px
+  }
+  .app.keyboard-open .game-stage #questionDots{order:11;display:none!important}
+  .app.keyboard-tight .game-stage #gamePanel{padding:7px 10px 5px!important}
+  .app.keyboard-tight .game-stage #gamePanel .timer-bar{margin:4px 0 6px!important}
+  .app.keyboard-tight .game-stage #questionText{font-size:16px!important;margin:3px 0 5px!important}
+  .app.keyboard-tight .game-stage #questionDesc{display:none!important}
+  .app.keyboard-tight .game-stage #answerSuggestions{max-height:70px}
+}
 </style>
 </head>
 <body>
@@ -515,9 +589,9 @@
       <div class="actions home-cta-row"><button id="startDaily" type="button" class="button home-start"><span class="home-start-label">RUN TODAY'S HEAT</span><span class="home-start-arrow" aria-hidden="true">↓</span></button></div>
     </section>
     <section id="gamePanel" class="panel hide" aria-live="off">
-      <div class="question-top"><span class="count-label" id="countLabel">ROUND 1 OF 8</span><span class="timer" id="timer">25.0s</span></div><div class="timer-bar"><div id="timerFill"></div></div>
+      <div class="question-top"><span class="count-label" id="countLabel">ROUND 1 OF 8</span><span id="mobileScoreChip" class="mobile-score-chip" aria-label="Current score">0m</span><span class="timer" id="timer">25.0s</span></div><div class="timer-bar"><div id="timerFill"></div></div>
       <div class="label" id="topicLabel">OLYMPIC HISTORY</div><h2 id="questionText" class="question"></h2><p id="questionDesc" class="description">Type one valid answer. Obscure answers go further.</p><a id="sourceLink" target="_blank" rel="noopener noreferrer" class="source-link" href="#">VIEW OFFICIAL SOURCE ↗</a>
-      <form class="entry" id="answerForm" autocomplete="off"><input id="answerInput" class="answer" type="text" maxlength="80" placeholder="Enter a name or place…" autocapitalize="words" spellcheck="false" autocomplete="off" aria-label="Your answer" /><button type="submit" id="submitAnswer" class="button">SUBMIT →</button></form>
+      <form class="entry" id="answerForm" autocomplete="off"><input id="answerInput" class="answer" type="text" maxlength="80" placeholder="Enter a name or place…" autocapitalize="words" inputmode="text" enterkeyhint="go" autocorrect="off" spellcheck="false" autocomplete="off" aria-label="Your answer" /><button type="submit" id="submitAnswer" class="button">SUBMIT →</button></form>
       <div id="answerSuggestions" class="suggestions hide" aria-live="polite" aria-label="Spelling suggestions"></div><div id="validationMessage" class="message" aria-live="polite"></div><div id="feedback" class="feedback hide" aria-live="polite"><div id="feedbackBig" class="big"></div><div id="feedbackMsg" class="msg"></div></div><button id="nextButton" class="button next hide">NEXT QUESTION →</button>
       <div class="dots" id="questionDots" aria-label="Question progress"></div>
     </section>
@@ -10316,9 +10390,38 @@ function buildStages(){
 function switchStage(stage){document.querySelector('.app').dataset.stage=stage;for(const key of ['home','game','results'])byId(key+'Stage').inert=key!==stage;byId(stage+'Stage').scrollTop=0;}
 function descendTo(stage){const app=document.querySelector('.app');app.classList.add('is-descending');switchStage(stage);setTimeout(()=>app.classList.remove('is-descending'),850);}
 function showPanel(id){switchStage(id==='homePanel'?'home':id==='gamePanel'?'game':'results');}
+// On phones, the virtual keyboard often shrinks visualViewport without resizing
+// the layout viewport. Match the game to the actually visible screen area.
+function setupMobileKeyboard(){
+  const app=document.querySelector('.app'),input=byId('answerInput');
+  const mobile=()=>window.matchMedia('(max-width:700px) and (pointer:coarse)').matches;
+  function updateViewport(){
+    if(!mobile()){
+      app.classList.remove('keyboard-open','keyboard-tight');
+      app.style.removeProperty('--mobile-visible-height');
+      return;
+    }
+    const visible=Math.max(240,Math.round(window.visualViewport?.height||window.innerHeight));
+    app.style.setProperty('--mobile-visible-height',visible+'px');
+    const typing=app.dataset.stage==='game'&&document.activeElement===input&&!input.disabled;
+    app.classList.toggle('keyboard-open',typing);
+    app.classList.toggle('keyboard-tight',typing&&visible<430);
+  }
+  const schedule=()=>requestAnimationFrame(updateViewport);
+  input.addEventListener('focus',schedule);
+  input.addEventListener('blur',()=>setTimeout(updateViewport,100));
+  window.addEventListener('resize',schedule);
+  window.addEventListener('orientationchange',schedule);
+  if(window.visualViewport){
+    window.visualViewport.addEventListener('resize',schedule);
+    window.visualViewport.addEventListener('scroll',schedule);
+  }
+  updateViewport();
+}
 let runnerAt=0,runnerMotion=0;
 function positionRunner(percent){const line=byId('lane0');const path=byId('progressPath');path.setAttribute('stroke-dasharray',`${percent} ${100-percent}`);const pos=line.getPointAtLength(line.getTotalLength()*percent/100);byId('runner').setAttribute('transform',`translate(${pos.x} ${pos.y})`);byId('spriteFacing').setAttribute('transform',percent>48&&percent<97?'scale(-1 1)':'');}
 function moveRunner(metres,animated=false){
+  const chip=byId('mobileScoreChip');if(chip){chip.textContent=Math.round(metres)+'m';chip.setAttribute('aria-label','Current score '+Math.round(metres)+' metres');}
   renderMiniClock(metres,animated);const goal=Math.max(0,Math.min(100,metres/800*100));cancelAnimationFrame(runnerMotion);
   if(!animated||matchMedia('(prefers-reduced-motion: reduce)').matches){runnerAt=goal;positionRunner(goal);return;}
   const from=runnerAt,start=performance.now(),duration=Math.max(450,Math.min(950,530+Math.abs(goal-from)*12));
@@ -10440,7 +10543,7 @@ function submit(event){
   byId('answerInput').focus();
 }
 function category(points){if(points>=90)return 'DEEP CUT';if(points>=70)return 'RARE PICK';if(points>=50)return 'UNCOMMON';if(points>=25)return 'SOLID KNOWLEDGE';return 'POPULAR PICK';}
-function finalize(entry){if(locked)return;locked=true;setSuspense(false);cancelAnimationFrame(ticker);byId('answerInput').disabled=true;byId('submitAnswer').disabled=true;byId('answerForm').classList.add('hide');byId('answerSuggestions').classList.add('hide');byId('nextButton').classList.remove('hide');const points=entry?entry[1]:0;total+=points;answers.push({topic:questions[questionIndex].topic,prompt:questions[questionIndex].prompt,name:entry?entry[0]:'No accepted answer',points});moveRunner(total,!!entry);byId('feedback').classList.remove('hide','missed','surge-good');if(entry){triggerSurge(points);byId('feedbackBig').textContent=`+${points} METRES · ${category(points)}`;byId('feedbackMsg').textContent=entry[0]+' — on the board.';}else{byId('feedback').classList.add('missed');byId('feedbackBig').textContent='+0 METRES · TIME UP';byId('feedbackMsg').textContent='No accepted answer this round. Reset and go again on the next one.';}byId('nextButton').textContent=questionIndex===7?'SEE MY RESULT →':'NEXT QUESTION →';byId('announce').textContent=`${points} metres. ${category(points)}.`;}
+function finalize(entry){if(locked)return;locked=true;setSuspense(false);cancelAnimationFrame(ticker);byId('answerInput').blur();byId('answerInput').disabled=true;byId('submitAnswer').disabled=true;byId('answerForm').classList.add('hide');byId('answerSuggestions').classList.add('hide');byId('nextButton').classList.remove('hide');const points=entry?entry[1]:0;total+=points;answers.push({topic:questions[questionIndex].topic,prompt:questions[questionIndex].prompt,name:entry?entry[0]:'No accepted answer',points});moveRunner(total,!!entry);byId('feedback').classList.remove('hide','missed','surge-good');if(entry){triggerSurge(points);byId('feedbackBig').textContent=`+${points} METRES · ${category(points)}`;byId('feedbackMsg').textContent=entry[0]+' — on the board.';}else{byId('feedback').classList.add('missed');byId('feedbackBig').textContent='+0 METRES · TIME UP';byId('feedbackMsg').textContent='No accepted answer this round. Reset and go again on the next one.';}byId('nextButton').textContent=questionIndex===7?'SEE MY RESULT →':'NEXT QUESTION →';byId('announce').textContent=`${points} metres. ${category(points)}.`;}
 function nextQuestion(){if(!locked)return;questionIndex++;if(questionIndex>=questions.length){finishRun();return;}loadQuestion();}
 function finishRun(){cancelAnimationFrame(ticker);const correct=answers.filter(a=>a.points>0).length;const result={date:utcDate(),total,answers,correct};try{localStorage.setItem(dailyStorageKey(),JSON.stringify(result));}catch{}showResults(result);}
 function showResults(result){setSuspense(false);moveRunner(result.total);renderSharePoster(result);byId('resultsTitle').textContent=result.total>=550?'ELITE KNOWLEDGE.':result.total>=350?'GREAT RACE.':result.total>=170?'NICE RUN.':'THE FINISH LINE.';byId('resultsSubtitle').textContent=(result.date||utcDate())+' · '+'Daily heat'+' · 8 rounds';byId('finalScore').textContent=result.total;byId('finalHits').textContent=result.correct+' / 8';byId('answerReview').innerHTML='';(result.answers||[]).forEach((a,i)=>{const item=document.createElement('div');item.className='review-item';const n=document.createElement('div');n.className='review-index';n.textContent=String(i+1).padStart(2,'0');const answer=document.createElement('div');answer.className='review-name';const title=document.createElement('div');title.textContent=a.name;const sub=document.createElement('div');sub.className='review-topic';sub.textContent=a.topic;answer.append(title,sub);const pts=document.createElement('div');pts.className='review-score';pts.textContent='+'+a.points;item.append(n,answer,pts);byId('answerReview').appendChild(item);});descendTo('results');}
@@ -10758,7 +10861,7 @@ byId('brandHome').addEventListener('click',()=>{
 byId('posterScore').addEventListener('click',()=>renderMatrixScore(activeResult().total,true,25));
 byId('saveScoreImage').addEventListener('click',saveImage);
 byId('shareScoreImage').addEventListener('click',shareImage);
-byId('startDaily').addEventListener('click',()=>{const saved=readSaved();if(saved)showResults(saved);else startRun();});byId('answerForm').addEventListener('submit',submit);byId('answerInput').addEventListener('input',event=>{if(locked)return;byId('validationMessage').textContent='';renderSuggestions(event.target.value);});byId('nextButton').addEventListener('click',nextQuestion);byId('shareResult').addEventListener('click',share);document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!locked&&questions.length)updateClock();});buildStages();showWelcome();
+byId('startDaily').addEventListener('click',()=>{const saved=readSaved();if(saved)showResults(saved);else startRun();});byId('answerForm').addEventListener('submit',submit);byId('answerInput').addEventListener('input',event=>{if(locked)return;byId('validationMessage').textContent='';renderSuggestions(event.target.value);});byId('nextButton').addEventListener('click',nextQuestion);byId('shareResult').addEventListener('click',share);document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!locked&&questions.length)updateClock();});buildStages();setupMobileKeyboard();showWelcome();
 </script>
 </body>
 </html>
