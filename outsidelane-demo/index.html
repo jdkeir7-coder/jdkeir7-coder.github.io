@@ -358,6 +358,21 @@
       100%{transform:perspective(170px) rotateX(180deg)}
     }
     @media(prefers-reduced-motion:reduce){.flip-pixel{animation:none!important}}
+
+/* Split-flap domino clock: each of the 105 tiles flickers independently. */
+.result-back-button{flex:none}
+.score-replay{appearance:none;border:0;border-radius:2px;padding:0;margin:0;width:100%;background:transparent;color:inherit;font:inherit;cursor:pointer;touch-action:manipulation}
+.score-replay:hover{background:#f7fbb908}.score-replay:focus-visible{outline:2px solid #f5f92d;outline-offset:3px}.score-replay:active{background:#f7fbb915}
+.matrix-pixel.flip-pixel,.mini-matrix-pixel.flip-pixel{--old-opacity:.23;--new-opacity:.23;--new-face:#51584c;--new-glow:none;animation:dominoDotFlip 470ms cubic-bezier(.23,.8,.31,1) both;animation-delay:var(--flip-delay,0ms)}
+.matrix-pixel.flip-pixel.old-lit,.mini-matrix-pixel.flip-pixel.old-lit{--old-opacity:1}
+.matrix-pixel.flip-pixel.new-lit{--new-opacity:1;--new-face:#f5f92d;--new-glow:0 0 .8cqw #f5f92d88}
+.mini-matrix-pixel.flip-pixel.new-lit{--new-opacity:1;--new-face:#f0f827;--new-glow:0 0 3px #eeff4c9c}
+.matrix-pixel.flip-pixel::before,.mini-matrix-pixel.flip-pixel::before{opacity:var(--old-opacity);animation:dominoOldFaceSpark 470ms steps(1,end) both;animation-delay:var(--flip-delay,0ms)}
+.matrix-pixel.flip-pixel::after,.mini-matrix-pixel.flip-pixel::after{opacity:var(--new-opacity);background:var(--new-face);box-shadow:var(--new-glow);animation:dominoNewFaceSpark 470ms steps(1,end) both;animation-delay:var(--flip-delay,0ms)}
+@keyframes dominoDotFlip{0%{transform:perspective(160px) rotateX(0deg);filter:brightness(.7)}46%{transform:perspective(160px) rotateX(85deg);filter:brightness(3.2)}54%{transform:perspective(160px) rotateX(95deg);filter:brightness(3.2)}100%{transform:perspective(160px) rotateX(180deg);filter:brightness(1)}}
+@keyframes dominoOldFaceSpark{0%,17%{opacity:var(--old-opacity);background:#51584c}18%,27%{opacity:1;background:#fffbc1;box-shadow:0 0 6px #fbf675}28%,100%{opacity:var(--old-opacity);background:#51584c;box-shadow:none}}
+@keyframes dominoNewFaceSpark{0%,53%{opacity:.23;background:#51584c;box-shadow:none}54%,63%{opacity:1;background:#fffbd2;box-shadow:0 0 9px #fbf56f}64%,71%{opacity:.18;background:#51584c;box-shadow:none}72%,83%{opacity:1;background:#fff6aa;box-shadow:0 0 7px #fff27a}84%,100%{opacity:var(--new-opacity);background:var(--new-face);box-shadow:var(--new-glow)}}
+@media(prefers-reduced-motion:reduce){.matrix-pixel.flip-pixel,.mini-matrix-pixel.flip-pixel,.matrix-pixel.flip-pixel::before,.matrix-pixel.flip-pixel::after,.mini-matrix-pixel.flip-pixel::before,.mini-matrix-pixel.flip-pixel::after{animation:none!important}}
 </style>
 </head>
 <body>
@@ -370,7 +385,7 @@
       <div class="race-clock" id="raceClock" role="img" aria-label="Score 0 out of 800 metres">
         <div class="race-clock-brand">OUTSIDELANE<span>.</span></div>
         <div class="race-clock-screen"><div id="raceClockDigits" class="race-clock-digits" aria-hidden="true"></div></div>
-        <div class="race-clock-footer"><span>METRES</span><strong>OF 800</strong></div>
+        <div class="race-clock-footer"><span>METRES</span></div>
       </div>
     </div>
     <div id="surgeBadge" class="surge-badge" aria-hidden="true">SURGE!</div>
@@ -426,7 +441,8 @@
       <h2 class="results-heading">Your race.<br><span>Your result.</span></h2>
       <p class="results-instruction">Made for the group chat. Your scorecard hides the answers, so friends can still play.</p>
 
-      <div class="result-icon-toolbar" role="group" aria-label="Result sharing options">
+      <div class="result-icon-toolbar" role="group" aria-label="Results navigation and sharing options">
+        <button id="backToHome" class="result-icon-button result-back-button" type="button" aria-label="Back to start" title="Back to start"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 12H5m0 0 7-7m-7 7 7 7"/></svg></button>
         <span id="shareStatus" class="share-status" role="status" aria-live="polite">SELECT A SPLIT TO EXPLORE</span>
         <button id="saveScoreImage" class="result-icon-button" type="button" aria-label="Download result image" title="Save result image"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v3h16v-3"/></svg></button>
         <button id="shareScoreImage" class="result-icon-button" type="button" aria-label="Share result image" title="Share result image"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 16V3m0 0L7 8m5-5 5 5M5 14v6h14v-6"/></svg></button>
@@ -438,11 +454,11 @@
         <div class="matrix-frame" aria-label="Trackside-style finish scoreboard">
           <div class="matrix-header"><span class="matrix-brand">OUTSIDELANE<span>.</span></span><span class="matrix-headmeta">ATHLETICS<br>RESULTS</span></div>
           <div class="matrix-screen">
-            <div class="matrix-screen-top"><span>FINISH RESULT</span><span>8 QUESTIONS</span></div>
-            <div id="posterScore" class="matrix-screen-value" role="img" aria-label="0 metres out of 800"></div>
-            <div class="matrix-screen-bottom"><span>METRES SCORED</span><strong>OF 800</strong></div>
+            <div class="matrix-screen-top"><span>FINISH RESULT</span><span>FINAL SCORE</span></div>
+            <button id="posterScore" class="matrix-screen-value score-replay" type="button" aria-label="Replay the score animation" title="Replay the score animation"></button>
+            <div class="matrix-screen-bottom"><span>METRES SCORED</span></div>
           </div>
-          <div class="matrix-footer"><span>HEAT COMPLETE</span><span>08 / 08</span></div>
+          <div class="matrix-footer"><span>HEAT COMPLETE</span></div>
         </div>
         <div class="poster-title" id="posterTitle">OUTSIDE<br>THE PACK.</div>
         <div class="poster-stats"><span><b id="posterCorrect">0/8</b> VALID ANSWERS</span><span><b id="posterRare">0</b> RARE SPLITS</span></div>
@@ -10387,16 +10403,16 @@ function renderMiniClock(value,animated=false){
     for(let row=0;row<7;row++)for(let col=0;col<5;col++){
       const newOn=MATRIX_DIGITS[digits[d]][row][col]==='1';
       const oldOn=MATRIX_DIGITS[previous[d]][row][col]==='1';
-      const tileChanges=oldOn!==newOn;
-      const delay=35+d*105+row*18+col*12;
-      glyph.appendChild(buildFlippingPixel('mini-matrix-pixel',oldOn,newOn,delay,flip&&tileChanges));
+      const order=row*15+d*5+col;
+      const delay=30+order*6;
+      glyph.appendChild(buildFlippingPixel('mini-matrix-pixel',oldOn,newOn,delay,flip));
     }
     fragment.appendChild(glyph);
   }
   target.replaceChildren(fragment);target.dataset.digits=digits;
   byId('raceClock').setAttribute('aria-label','Score '+Math.round(Number(value)||0)+' out of 800 metres');
 }
-function renderMatrixScore(value,animated=false){
+function renderMatrixScore(value,animated=false,baseDelay=760){
   const target=byId('posterScore'),digits=scoreboardDigits(value);
   const flip=!!animated&&flipMotionEnabled();
   const fragment=document.createDocumentFragment();
@@ -10405,13 +10421,14 @@ function renderMatrixScore(value,animated=false){
     for(let row=0;row<7;row++)for(let col=0;col<5;col++){
       const newOn=MATRIX_DIGITS[digits[d]][row][col]==='1';
       // A dark old face gives every LED tile an individual "arrival board" reveal.
-      const delay=780+d*160+row*27+col*17;
+      const order=row*15+d*5+col;
+      const delay=baseDelay+order*12;
       glyph.appendChild(buildFlippingPixel('matrix-pixel',false,newOn,delay,flip));
     }
     fragment.appendChild(glyph);
   }
   target.replaceChildren(fragment);
-  target.setAttribute('aria-label',Number(value)+' metres out of 800');
+  target.setAttribute('aria-label','Score '+Number(value)+' metres. Replay the clock animation');
 }
 function paintMatrixCanvas(ctx,value,x,y,pixel,gap,digitSpace){
   const digits=scoreboardDigits(value),digitW=5*pixel+4*gap,totalW=3*digitW+2*digitSpace;
@@ -10518,13 +10535,11 @@ function paintPoster(result){
   rect(101,269,880,271,2,glass);
   for(let y=278;y<533;y+=9){line(103,y,979,y,'#ffffff07',1)}
   write('FINISH RESULT',130,312,21,'900','#c5ca8a','left','monospace');
-  write('8 QUESTIONS',948,312,21,'900','#c5ca8a','right','monospace');
+  write('FINAL SCORE',948,312,21,'900','#c5ca8a','right','monospace');
   const px=22,gap=6,space=23,total=3*(5*px+4*gap)+2*space;
   paintMatrixCanvas(g,result.total,540-total/2,322,px,gap,space);
   write('METRES SCORED',129,522,21,'900','#c6c99d','left','monospace');
-  write('OF 800',948,522,28,'1000','#f2f52d','right','monospace');
   write('HEAT COMPLETE',111,595,27,'1000','#3a2b08');
-  write('08 / 08',973,595,25,'1000','#3a2b08','right');
   // Race summary sits below the clock, keeping the clock the focus of the card.
   const h=scoreHeadline(result.total).replace('<br>',' ').replace(/\s+/g,' ').trim();
   write(h,69,724,66,'1000','#fff');
@@ -10557,6 +10572,8 @@ async function shareImage(){const btn=byId('shareScoreImage');btn.disabled=true;
 function deployedGameUrl(){return /^https?:$/.test(location.protocol)&&!['localhost','127.0.0.1'].includes(location.hostname)?location.origin+location.pathname:null;}
 function getShareText(){const data=readSaved()||{total,answers};const squares=(data.answers||[]).map(a=>a.points>=90?'🟩':a.points>=70?'🟨':a.points>=50?'🟧':a.points>0?'🟫':'⬛').join('');return `OUTSIDELANE · Daily ${utcDate()}\n🏃 ${data.total}/800 metres\n${squares}\n8 questions. 25 seconds each. How rare are you?${deployedGameUrl()?'\n'+deployedGameUrl():''}`}
 async function share(){const message=getShareText();try{if(navigator.clipboard){await navigator.clipboard.writeText(message);byId('shareStatus').textContent='Spoiler-free score copied to clipboard.';return;}}catch(e){}window.prompt('Copy your result:',message);}
+byId('backToHome').addEventListener('click',()=>showWelcome());
+byId('posterScore').addEventListener('click',()=>renderMatrixScore(activeResult().total,true,25));
 byId('saveScoreImage').addEventListener('click',saveImage);
 byId('shareScoreImage').addEventListener('click',shareImage);
 byId('startDaily').addEventListener('click',()=>{const saved=readSaved();if(saved)showResults(saved);else startRun();});byId('answerForm').addEventListener('submit',submit);byId('answerInput').addEventListener('input',event=>{if(locked)return;byId('validationMessage').textContent='';renderSuggestions(event.target.value);});byId('nextButton').addEventListener('click',nextQuestion);byId('shareResult').addEventListener('click',share);document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!locked&&questions.length)updateClock();});buildStages();showWelcome();
