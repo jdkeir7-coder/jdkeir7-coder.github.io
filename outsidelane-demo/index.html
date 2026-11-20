@@ -10465,10 +10465,11 @@ function rollClockDigits(targetId,score,kind,animate,initialDelay=0){
   target.replaceChildren(fragment);
   target.dataset.digits=digits;
   if(!shouldRoll)return;
-  // 0/355/710 ms for the result board; 0/245/490 for race updates.
-  // Each column cycles for 900/660 ms, creating a deliberate overlap.
+  // Result board: 0/560/1120 ms; race board: 0/420/840 ms.
+  // Each digit runs for ~900/660 ms. The following digit starts as the
+  // previous one approaches its finish, with no three-column overlap.
   const stepTime=kind==='mini'?110:150;
-  const stagger=kind==='mini'?245:355;
+  const stagger=kind==='mini'?420:560;
   const steps=kind==='mini'?6:6;
   const timeoutIds=[];
   for(let d=0;d<3;d++){
