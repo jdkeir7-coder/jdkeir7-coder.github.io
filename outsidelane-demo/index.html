@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#8e322e" />
-  <meta name="description" content="OUTSIDELANE: Think outside the box. Eight daily athletics questions, 25 seconds each. The rarest correct answer wins." />
+  <meta name="description" content="OUTSIDELANE: Think outside the track. Eight daily athletics questions, 25 seconds each. The rarest correct answer wins." />
   <title>OUTSIDELANE — The Daily Athletics Challenge</title>
   <style>
     :root{--bg:#071b15;--panel:#0d2a20;--panel2:#103328;--border:#285144;--green:#a2ff65;--text:#f1f7ef;--muted:#9cb6ab;--orange:#db8962;--red:#ff867a;--yellow:#f5d787;--shadow:0 22px 76px #010d0955}
@@ -406,16 +406,34 @@
 .brand-home:focus-visible,.result-wordmark-home:focus-visible{outline:2px solid #fff29b;outline-offset:4px;border-radius:4px}
 .result-wordmark-home{appearance:none;border:0;background:transparent;text-align:left;color:#171716;cursor:pointer;padding:0;font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
 .result-wordmark-home:hover,.brand-home:hover{filter:brightness(1.1)}
-/* Per-dot 15-column score reveal, each column with its own top-to-bottom cascade. */
-.matrix-pixel.score-dot-reveal{animation:scoreColumnFlicker 440ms steps(1,end) both;animation-delay:var(--dot-delay,0ms);transform-origin:50% 50%}
-@keyframes scoreColumnFlicker{
-  0%,11%{background:#414841;opacity:.16;box-shadow:none;transform:perspective(95px) rotateX(80deg)}
-  12%,23%{background:#fff59b;opacity:1;box-shadow:0 0 1.3cqw #ffff88;transform:perspective(95px) rotateX(25deg)}
-  24%,40%{background:#55594a;opacity:.24;box-shadow:none;transform:perspective(95px) rotateX(8deg)}
-  41%,56%{background:#fcfa69;opacity:1;box-shadow:0 0 1.1cqw #ffff70;transform:rotateX(0deg)}
-  57%,70%{background:#50564a;opacity:.2;box-shadow:none}
-  71%,86%{background:#fffb9b;opacity:1;box-shadow:0 0 1.2cqw #ffff94}
-  87%,100%{background:var(--settle-color);opacity:var(--settle-opacity);box-shadow:var(--settle-glow);transform:none}
+/* A left-to-right 15-column score reveal. Only FINAL lit pixels flash yellow. */
+.matrix-pixel.score-dot-reveal.is-lit{
+  animation:scoreColumnOn 440ms steps(1,end) both;
+  animation-delay:var(--dot-delay,0ms);
+  transform-origin:50% 50%;
+}
+.matrix-pixel.score-dot-reveal:not(.is-lit){
+  animation:scoreColumnOff 440ms steps(1,end) both;
+  animation-delay:var(--dot-delay,0ms);
+  transform-origin:50% 50%;
+}
+@keyframes scoreColumnOn{
+  0%,11%{background:#414841;opacity:.13;box-shadow:none;transform:perspective(95px) rotateX(80deg)}
+  12%,23%{background:#fffb99;opacity:1;box-shadow:0 0 1.3cqw #ffff88;transform:perspective(95px) rotateX(25deg)}
+  24%,40%{background:#777c38;opacity:.48;box-shadow:none;transform:perspective(95px) rotateX(8deg)}
+  41%,56%{background:#f5f92d;opacity:1;box-shadow:0 0 1.1cqw #f7ff69;transform:rotateX(0)}
+  57%,70%{background:#919a38;opacity:.53;box-shadow:none}
+  71%,86%{background:#fffda0;opacity:1;box-shadow:0 0 1.2cqw #ffff94}
+  87%,100%{background:#f5f92d;opacity:1;box-shadow:0 0 .2cqw #fbff65,0 0 1.1cqw #daec3275;transform:none}
+}
+@keyframes scoreColumnOff{
+  0%,11%{background:#333b3a;opacity:.07;box-shadow:none;transform:perspective(95px) rotateX(80deg)}
+  12%,23%{background:#4b5149;opacity:.20;box-shadow:none;transform:perspective(95px) rotateX(25deg)}
+  24%,40%{background:#363f3c;opacity:.09;box-shadow:none;transform:perspective(95px) rotateX(8deg)}
+  41%,56%{background:#545c51;opacity:.20;box-shadow:none;transform:rotateX(0)}
+  57%,70%{background:#343b39;opacity:.08;box-shadow:none}
+  71%,86%{background:#535c50;opacity:.20;box-shadow:none}
+  87%,100%{background:#595d46;opacity:.22;box-shadow:none;transform:none}
 }
 /* Actual 5x7 square dots for every result in the METRES split column. */
 .poster-split{grid-template-columns:4cqw minmax(0,1fr) 15cqw 10.5cqw!important}
@@ -426,12 +444,26 @@
 .split-matrix-pixel.is-lit{opacity:1;background:#fffaf0;box-shadow:0 0 .5cqw #ffffff6b}
 .split-matrix-unit{font-size:3cqw;line-height:1;font-weight:950;color:#fff9ef}
 @media(prefers-reduced-motion:reduce){.matrix-pixel.score-dot-reveal{animation:none!important}}
+
+/* Stronger split-score LED numerals; metres unit is conveyed in the column heading. */
+.poster-split{grid-template-columns:4cqw minmax(0,1fr) 14cqw 13.5cqw!important}
+.poster-split-points{display:flex;justify-content:flex-end;align-items:center;min-width:0}
+.split-matrix-digits{gap:.63cqw}
+.split-matrix-character{
+  --sd:clamp(1.55px,.50cqw,3.1px);--sg:clamp(.35px,.12cqw,.8px);
+  display:grid;grid-template-columns:repeat(5,var(--sd));grid-template-rows:repeat(7,var(--sd));gap:var(--sg)
+}
+.split-matrix-pixel{background:#d6b8ae;opacity:.10}
+.split-matrix-pixel.is-lit{background:#fffbd7;opacity:1;box-shadow:0 0 .55cqw #fff0a08c}
+.poster-bottom .poster-tagline{font-weight:850;letter-spacing:.02em;color:#ffe1d2}
+.poster-bottom .poster-tagline em{font-style:italic;font-weight:1000;color:#fff;font-size:1.18em}
+@media(prefers-reduced-motion:reduce){.matrix-pixel.score-dot-reveal{animation:none!important}}
 </style>
 </head>
 <body>
 <div class="app">
   <header class="top"><button id="brandHome" class="brand brand-home" type="button" aria-label="OUTSIDELANE: return to the start" title="Back to the start"><span class="brand-badge">OL</span>OUTSIDELANE</button><div class="top-right">The athletics daily</div></header>
-  <section id="intro" class="hero"><div class="kicker"><span class="live-dot"></span> THE DAILY START LINE</div><h1>Think outside.<br><em>Run obscure.</em></h1><p class="sub">Think outside the box. Find the rarest answer. Eight athletics questions, 25 seconds each — and a race to the outside lane.</p></section>
+  <section id="intro" class="hero"><div class="kicker"><span class="live-dot"></span> THE DAILY START LINE</div><h1>Think outside<br><em>the track.</em></h1><p class="sub">Think outside the track. Find the rarest answer. Eight athletics questions, 25 seconds each — and a race to the outside lane.</p></section>
   <section id="raceCard" class="race-card" aria-label="Race track showing your score">
     <div class="race-top">
       <div class="race-label-group"><span id="raceLabel">DAILY RACE</span><span class="race-label-sub">800M · 8 QUESTIONS</span></div>
@@ -517,7 +549,7 @@
         <div class="poster-stats"><span><b id="posterCorrect">0/8</b> VALID ANSWERS</span><span><b id="posterRare">0</b> RARE SPLITS</span></div>
         <div class="poster-splits-heading"><span>YOUR EIGHT SPLITS</span><span>METRES</span></div>
         <div class="poster-splits" id="posterSplits"></div>
-        <div class="poster-bottom"><span>THINK OUTSIDE THE BOX.<br><b>RUN OBSCURE.</b></span><span class="poster-challenge">CAN YOU BEAT ME? <span>↗</span></span></div>
+        <div class="poster-bottom"><span class="poster-tagline">THINK OUTSIDE THE <em>TRACK.</em></span><span class="poster-challenge">CAN YOU BEAT ME? <span>↗</span></span></div>
       </div>
 
 
@@ -10414,7 +10446,7 @@ function finishRun(){cancelAnimationFrame(ticker);const correct=answers.filter(a
 function showResults(result){setSuspense(false);moveRunner(result.total);renderSharePoster(result);byId('resultsTitle').textContent=result.total>=550?'ELITE KNOWLEDGE.':result.total>=350?'GREAT RACE.':result.total>=170?'NICE RUN.':'THE FINISH LINE.';byId('resultsSubtitle').textContent=(result.date||utcDate())+' · '+'Daily heat'+' · 8 rounds';byId('finalScore').textContent=result.total;byId('finalHits').textContent=result.correct+' / 8';byId('answerReview').innerHTML='';(result.answers||[]).forEach((a,i)=>{const item=document.createElement('div');item.className='review-item';const n=document.createElement('div');n.className='review-index';n.textContent=String(i+1).padStart(2,'0');const answer=document.createElement('div');answer.className='review-name';const title=document.createElement('div');title.textContent=a.name;const sub=document.createElement('div');sub.className='review-topic';sub.textContent=a.topic;answer.append(title,sub);const pts=document.createElement('div');pts.className='review-score';pts.textContent='+'+a.points;item.append(n,answer,pts);byId('answerReview').appendChild(item);});descendTo('results');}
 
 // Share card: a spoiler-free visual that fits a single mobile screenshot.
-function scoreHeadline(metres){return metres>=640?'LEGENDARY<br>LANE.':metres>=470?'OUTSIDE<br>THE PACK.':metres>=270?'STRONG<br>FINISH.':'KEEP<br>CHASING.';}
+function scoreHeadline(metres){return metres>=640?'LEGENDARY<br>LANE.':metres>=470?'OUTSIDE<br>THE PACK.':metres>=270?'FIND YOUR<br>LANE.':'KEEP<br>CHASING.';}
 function splitTier(points){return points===0?{label:'NO MARK',color:'#866261'}:points>=90?{label:'DEEP CUT',color:'#ffffff'}:points>=70?{label:'RARE PICK',color:'#f7d99f'}:points>=50?{label:'UNCOMMON',color:'#ffb58d'}:points>=25?{label:'SOLID',color:'#d8a096'}:{label:'POPULAR',color:'#b77b73'};}
 function readableDate(iso){const d=new Date((iso||utcDate())+'T12:00:00Z');return d.toLocaleDateString('en-GB',{timeZone:'UTC',day:'2-digit',month:'short',year:'numeric'}).toUpperCase();}
 // 5x7 square-LED glyphs shared by the live board and the exported PNG.
@@ -10546,7 +10578,7 @@ function renderMatrixScore(value,animated=false,baseDelay=760){
   target.setAttribute('aria-label','Score '+Number(value)+' metres. Replay the LED reveal');
 }
 function paintSplitMatrixNumber(ctx,value,xRight,yTop){
-  const digits=String(value),dot=3.1,gap=1.15,spacing=4.2;
+  const digits=String(value),dot=4.3,gap=1.2,spacing=5.5;
   const glyphWidth=5*dot+4*gap,allWidth=digits.length*glyphWidth+(digits.length-1)*spacing;
   const start=xRight-allWidth;
   ctx.save();
@@ -10554,7 +10586,7 @@ function paintSplitMatrixNumber(ctx,value,xRight,yTop){
     const pattern=MATRIX_DIGITS[digits[n]];if(!pattern)continue;
     for(let row=0;row<7;row++)for(let col=0;col<5;col++){
       const lit=pattern[row][col]==='1';
-      ctx.globalAlpha=lit?1:.13;ctx.fillStyle=lit?'#fff9e5':'#ffd8ba';
+      ctx.globalAlpha=lit?1:.10;ctx.fillStyle=lit?'#fffbd7':'#d6b8ae';
       if(lit){ctx.shadowColor='#fff9e5';ctx.shadowBlur=2;}else{ctx.shadowBlur=0;}
       ctx.fillRect(start+n*(glyphWidth+spacing)+col*(dot+gap),yTop+row*(dot+gap),dot,dot);
     }
@@ -10596,8 +10628,8 @@ function renderSharePoster(result){
       }
       matrix.appendChild(glyph);
     }
-    const unit=document.createElement('span');unit.className='split-matrix-unit';unit.textContent='m';
-    score.append(matrix,unit);
+    score.setAttribute('aria-label',points+' metres');
+    score.appendChild(matrix);
     row.append(num,bar,label,score);target.appendChild(row);
   }
   byId('shareStatus').textContent='SELECT A SPLIT TO EXPLORE';
@@ -10696,12 +10728,15 @@ function paintPoster(result){
     write(String(i+1).padStart(2,'0'),73,y+25,22,'900','#f1ccbf');
     rect(135,y+10,475,14,7,'#ffffff27');
     if(points>0)rect(135,y+10,Math.max(7,475*Math.min(100,points)/100),14,7,t.color);
-    write(t.label,651,y+26,22,'900','#f5d5c8');paintSplitMatrixNumber(g,points,976,y+6);write('m',1007,y+29,24,'900','#fff','right');
+    write(t.label,651,y+26,22,'900','#f5d5c8');paintSplitMatrixNumber(g,points,1007,y+3);
     if(i<7)line(71,y+42,1010,y+42,'#ffffff23',1);
   }
   line(70,1282,1010,1282,'#ffffff8a',2);
-  write('THINK OUTSIDE THE BOX.',72,1310,24,'850','#ffe7db');
-  write('RUN OBSCURE.',72,1341,32,'1000','#fff');
+  const tagline='THINK OUTSIDE THE ';
+  g.font='850 26px system-ui,-apple-system,sans-serif';
+  const leadWidth=g.measureText(tagline).width;
+  write(tagline,72,1321,26,'850','#ffe7db');
+  g.save();g.font='italic 900 29px system-ui,-apple-system,sans-serif';g.fillStyle='#fff';g.textAlign='left';g.textBaseline='alphabetic';g.fillText('TRACK.',72+leadWidth,1321);g.restore();
   write('CAN YOU BEAT ME?  ↗',1006,1324,27,'1000','#fff','right');
   return c;
 }
@@ -10710,7 +10745,7 @@ function activeResult(){return readSaved()||{date:utcDate(),total,answers};}
 function imageFilename(result){return 'outsidelane-'+(result.date||utcDate())+'-'+result.total+'m.png';}
 function downloadPoster(blob,filename){const a=document.createElement('a');const url=URL.createObjectURL(blob);a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1200);}
 async function saveImage(){const btn=byId('saveScoreImage');btn.disabled=true;byId('shareStatus').textContent='Creating your scorecard…';try{const r=activeResult();downloadPoster(await makePosterBlob(r),imageFilename(r));byId('shareStatus').textContent='Scorecard downloaded. Ready to post.';}catch(e){byId('shareStatus').textContent='Could not create the image in this browser.';}finally{btn.disabled=false;}}
-async function shareImage(){const btn=byId('shareScoreImage');btn.disabled=true;byId('shareStatus').textContent='Preparing your share card…';try{const r=activeResult(),blob=await makePosterBlob(r),file=new File([blob],imageFilename(r),{type:'image/png'});if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){byId('shareStatus').textContent='Choose where to share your result.';await navigator.share({files:[file],title:'OUTSIDELANE · '+r.total+'/800m',text:'Think outside the box. Run obscure.'});byId('shareStatus').textContent='Share action completed.';}else{downloadPoster(blob,file.name);byId('shareStatus').textContent='Image downloaded — share it anywhere.';}}catch(e){byId('shareStatus').textContent=e?.name==='AbortError'?'Sharing cancelled.':'Could not share; try Save Image instead.';}finally{btn.disabled=false;}}
+async function shareImage(){const btn=byId('shareScoreImage');btn.disabled=true;byId('shareStatus').textContent='Preparing your share card…';try{const r=activeResult(),blob=await makePosterBlob(r),file=new File([blob],imageFilename(r),{type:'image/png'});if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){byId('shareStatus').textContent='Choose where to share your result.';await navigator.share({files:[file],title:'OUTSIDELANE · '+r.total+'/800m',text:'Think outside the track.'});byId('shareStatus').textContent='Share action completed.';}else{downloadPoster(blob,file.name);byId('shareStatus').textContent='Image downloaded — share it anywhere.';}}catch(e){byId('shareStatus').textContent=e?.name==='AbortError'?'Sharing cancelled.':'Could not share; try Save Image instead.';}finally{btn.disabled=false;}}
 function deployedGameUrl(){return /^https?:$/.test(location.protocol)&&!['localhost','127.0.0.1'].includes(location.hostname)?location.origin+location.pathname:null;}
 function getShareText(){const data=readSaved()||{total,answers};const squares=(data.answers||[]).map(a=>a.points>=90?'🟩':a.points>=70?'🟨':a.points>=50?'🟧':a.points>0?'🟫':'⬛').join('');return `OUTSIDELANE · Daily ${utcDate()}\n🏃 ${data.total}/800 metres\n${squares}\n8 questions. 25 seconds each. How rare are you?${deployedGameUrl()?'\n'+deployedGameUrl():''}`}
 async function share(){const message=getShareText();try{if(navigator.clipboard){await navigator.clipboard.writeText(message);byId('shareStatus').textContent='Spoiler-free score copied to clipboard.';return;}}catch(e){}window.prompt('Copy your result:',message);}
