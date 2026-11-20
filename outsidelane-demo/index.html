@@ -304,6 +304,18 @@
     .tier-example-item b{color:#fbe58d;white-space:nowrap}.tier-empty{color:#caa69c;font-style:italic;font-size:12px}
     @media(max-height:710px) and (min-width:720px){.results-stage #sharePoster{max-width:325px!important}.results-stage #resultsPanel{gap:5px;padding:6px 13px!important}.results-stage .share-actions .button{min-height:38px;padding:8px}}
     @media(max-width:430px){.results-stage #resultsPanel{padding:7px 9px 15px!important}.split-dialog-body{padding:13px 14px 18px}}
+    /* Single daily-race CTA sits at the foot of the home viewport. */
+    .home-stage > main{width:100%;margin-top:auto!important;flex:0 0 auto}
+    .home-stage #homePanel{padding:14px 17px 16px}
+    .home-stage #homePanel .home-cta-row{margin-top:14px;width:100%;display:block}
+    .home-stage #startDaily{position:relative;display:flex;align-items:center;justify-content:center;width:100%;min-height:55px;border:1px solid #fff6eb;border-radius:15px;background:linear-gradient(112deg,#fffefd 0%,#fff4e9 65%,#ffe8d9 100%);color:#792b28;box-shadow:0 10px 28px #4b13184d, inset 0 1px 0 #fff;padding:13px 58px 13px 20px;font-size:13px;font-weight:950;letter-spacing:1.25px;transition:transform .2s,box-shadow .2s,background .2s}
+    .home-stage #startDaily:hover{transform:translateY(-2px);background:linear-gradient(110deg,#fff,#fff0e3);box-shadow:0 14px 32px #4b131866}
+    .home-stage #startDaily:active{transform:translateY(1px)}
+    .home-start-label{display:block;text-align:center;flex:1;white-space:nowrap}
+    .home-start-arrow{position:absolute;right:13px;top:50%;transform:translateY(-50%);width:31px;height:31px;display:grid;place-items:center;border-radius:10px;background:#862e2b;color:white;font-size:20px;font-weight:850;line-height:1;animation:homeArrowDrop 1.7s ease-in-out infinite}
+    @keyframes homeArrowDrop{0%,100%{transform:translateY(-50%)}50%{transform:translateY(-33%)}}
+    @media(max-width:620px){.home-stage #homePanel{padding:12px 13px 14px}.home-stage #startDaily{min-height:53px;font-size:12px;letter-spacing:.7px}}
+    @media(prefers-reduced-motion:reduce){.home-start-arrow{animation:none!important}}
 </style>
 </head>
 <body>
@@ -358,7 +370,7 @@
       <div class="label"><span class="live-dot"></span><span id="dateLabel">DAILY HEAT</span></div>
       <h2>How far can you go?</h2>
       <p>Hundreds of possible answers across world, European and US athletics. Think of a rare one.</p>
-      <div class="actions"><button id="startDaily" class="button grow">RUN TODAY'S HEAT <span aria-hidden="true">→</span></button><button id="startPractice" class="button secondary">PRACTICE MODE</button></div>
+      <div class="actions home-cta-row"><button id="startDaily" type="button" class="button home-start"><span class="home-start-label">RUN TODAY'S HEAT</span><span class="home-start-arrow" aria-hidden="true">↓</span></button></div>
     </section>
     <section id="gamePanel" class="panel hide" aria-live="off">
       <div class="question-top"><span class="count-label" id="countLabel">ROUND 1 OF 8</span><span class="timer" id="timer">25.0s</span></div><div class="timer-bar"><div id="timerFill"></div></div>
@@ -407,7 +419,7 @@
           <div class="answer-review" id="answerReview"></div>
         </div>
       </details>
-      <button id="practiceAgain" class="button secondary another-race">RUN A PRACTICE HEAT →</button>
+      
       <p class="fine more-note">Rarity scores are illustrative until real player submissions are collected. No percentile, leaderboard position or player ranking is inferred.</p>
       <dialog id="splitDetails" class="split-dialog" aria-labelledby="splitDialogTitle">
         <div class="split-dialog-header"><div><span id="splitDialogNumber" class="split-dialog-overline">QUESTION 01 / 08</span><h3 id="splitDialogTitle">YOUR SPLIT</h3></div><button id="closeSplitDetails" type="button" class="split-dialog-close" aria-label="Close answer examples">✕</button></div>
@@ -10081,7 +10093,7 @@ const rawQuestions=officialSeed.questions.map(q=>({group:q.group,bucket:q.bucket
 const byId = id => document.getElementById(id);
 
 const panels = ['homePanel','gamePanel','resultsPanel'];
-let mode='daily', questions=[], questionIndex=0, total=0, answers=[], remaining=25, deadline=0, ticker=0, locked=false;
+let questions=[], questionIndex=0, total=0, answers=[], remaining=25, deadline=0, ticker=0, locked=false;
 let surgeTimer=0;
 function normal(s){return (s||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/&/g,' and ').replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();}
 function dayIndex(){return Math.floor(Date.parse(new Date().toISOString().slice(0,10)+'T00:00:00Z')/86400000);}
@@ -10118,13 +10130,13 @@ function broadQuestionOptions(){
     copy(7,'Jumps, throws or combined events at European Indoors 2025.'),
   ].filter(q=>q.entries.length>=40);
 }
-function selectQuestions(practice=false){
+function selectQuestions(){
   // Broader daily prompts: every selected question has 40+ indexed answers,
   // usually 70-500. No single-final or three-medallist questions.
   const all=broadQuestionOptions();
   const fixed=[all[0],all[1],all[2],all[3],all[4],all[5],all[6]];
   const alternates=[all[7],all[8],all[9],all[10],all[11],all[12],all[13],all[14],all[15]];
-  const n=dayIndex()+(practice?Math.floor(Math.random()*99983):0);
+  const n=dayIndex();
   const selected=[...fixed,alternates[Math.abs(n)%alternates.length]];
   if(selected.some(q=>!q||q.entries.length<40))throw Error('A daily question has too few verified answer options');
   const random=mixSeed(n+271828);
@@ -10174,9 +10186,9 @@ setInterval(()=>{if(document.hidden)return;const sprite=byId('pixelRunner');if(!
 
 function setSuspense(active){byId('raceCard').classList.toggle('critical',active);byId('timer').classList.toggle('pulse',active);document.querySelector('.track').classList.toggle('suspense',active);}
 function triggerSurge(points){const badge=byId('surgeBadge');const race=byId('raceCard');const feedback=byId('feedback');clearTimeout(surgeTimer);badge.textContent=points>=90?'DEEP CUT!':points>=70?'SURGE!':points>=50?'BIG PICK!':'ON THE BOARD!';badge.classList.remove('show');race.classList.remove('surge');feedback.classList.remove('surge-good');void badge.offsetWidth;void race.offsetWidth;badge.classList.add('show');race.classList.add('surge');feedback.classList.add('surge-good');surgeTimer=setTimeout(()=>{race.classList.remove('surge');feedback.classList.remove('surge-good');},900);}
-function showWelcome(){cancelAnimationFrame(ticker);setSuspense(false);mode='daily';const played=readSaved();byId('dateLabel').textContent='DAILY HEAT · '+new Date(utcDate()+'T12:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short',timeZone:'UTC'}).toUpperCase();byId('homePanel').querySelector('h2').textContent=played?'Your daily race is complete.':'How far can you go?';byId('homePanel').querySelector('p').textContent=played?'Come back tomorrow for new prompts, or use practice mode now. Your result is saved on this device.':'Broad prompts with dozens or hundreds of correct athletes. The rarer your answer, the further you run.';byId('startDaily').textContent=played?'VIEW TODAY’S RESULT ↗':"RUN TODAY'S HEAT →";byId('raceLabel').textContent='DAILY RACE';moveRunner(played?played.total:0);byId('home-raceClockDigits').innerHTML=byId('raceClockDigits').innerHTML;showPanel('homePanel');}
+function showWelcome(){cancelAnimationFrame(ticker);setSuspense(false);const played=readSaved();byId('dateLabel').textContent='DAILY HEAT · '+new Date(utcDate()+'T12:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short',timeZone:'UTC'}).toUpperCase();byId('homePanel').querySelector('h2').textContent=played?'Your daily race is complete.':'How far can you go?';byId('homePanel').querySelector('p').textContent=played?'Your result is saved on this device. A new heat arrives tomorrow.':'Broad prompts with dozens or hundreds of correct athletes. The rarer your answer, the further you run.';byId('startDaily').querySelector('.home-start-label').textContent=played?'VIEW TODAY’S RESULT':"RUN TODAY'S HEAT";byId('raceLabel').textContent='DAILY RACE';moveRunner(played?played.total:0);byId('home-raceClockDigits').innerHTML=byId('raceClockDigits').innerHTML;showPanel('homePanel');}
 function readSaved(){try{const v=localStorage.getItem(dailyStorageKey());return v?JSON.parse(v):null;}catch{return null;}}
-function startRun(nextMode){cancelAnimationFrame(ticker);setSuspense(false);mode=nextMode;questions=selectQuestions(mode==='practice');questionIndex=0;total=0;answers=[];locked=false;byId('raceLabel').textContent=mode==='daily'?'TODAY’S HEAT':'TRAINING HEAT';moveRunner(0);descendTo('game');setTimeout(()=>{if(document.querySelector('.app').dataset.stage==='game')loadQuestion();},window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:850);}
+function startRun(){cancelAnimationFrame(ticker);setSuspense(false);questions=selectQuestions();questionIndex=0;total=0;answers=[];locked=false;byId('raceLabel').textContent='TODAY’S HEAT';moveRunner(0);descendTo('game');setTimeout(()=>{if(document.querySelector('.app').dataset.stage==='game')loadQuestion();},window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:850);}
 function loadQuestion(){cancelAnimationFrame(ticker);setSuspense(false);byId('surgeBadge').classList.remove('show');locked=false;remaining=25;byId('countLabel').textContent='ROUND '+(questionIndex+1)+' OF 8';byId('topicLabel').textContent=questions[questionIndex].topic;byId('questionText').textContent=questions[questionIndex].prompt;byId('questionDesc').textContent=questions[questionIndex].note;const source=questions[questionIndex].source;byId('sourceLink').href=officialSeed.sources[source];byId('sourceLink').textContent=({world:'WORLD ATHLETICS ENTRIES ↗',europe:'EUROPEAN ATHLETICS ENTRIES ↗',usatf:'USATF OFFICIAL RESULTS ↗'})[source] || ({toplists:'WORLD ATHLETICS TOP LIST ↗',world_outdoor:'WORLD ATHLETICS RESULTS ↗',euro_outdoor:'EUROPEAN OUTDOOR RESULTS ↗',usatf_outdoor:'USATF OUTDOOR RESULTS ↗',diamond_league:'DIAMOND LEAGUE SOURCE ↗',british_champs:'BRITISH ATHLETICS SOURCE ↗',marathon_majors:'MARATHON RESULTS & HISTORY ↗'})[questions[questionIndex].bucket] || 'OFFICIAL SOURCE ↗';byId('answerInput').value='';byId('answerInput').disabled=false;byId('submitAnswer').disabled=false;byId('answerForm').classList.remove('hide');byId('nextButton').classList.add('hide');byId('feedback').classList.add('hide');byId('validationMessage').textContent='';byId('answerSuggestions').replaceChildren();byId('answerSuggestions').classList.add('hide');drawDots();deadline=Date.now()+25000;updateClock();if(window.matchMedia('(min-width: 700px)').matches)byId('answerInput').focus();}
 function drawDots(){byId('questionDots').innerHTML=Array.from({length:8},(_,i)=>`<span class="dot ${i<questionIndex?'done':i===questionIndex?'active':''}"></span>`).join('');}
 function updateClock(){if(locked)return;remaining=Math.max(0,(deadline-Date.now())/1000);setSuspense(remaining<=5);byId('timer').textContent=remaining.toFixed(1)+'s';byId('timer').classList.toggle('warn',remaining<=10&&remaining>5);byId('timer').classList.toggle('danger',remaining<=5);byId('timerFill').style.width=(remaining/25*100)+'%';byId('timerFill').classList.toggle('warn',remaining<=10&&remaining>5);byId('timerFill').classList.toggle('danger',remaining<=5);if(remaining<=0){finalize(null);return;}ticker=requestAnimationFrame(updateClock);}
@@ -10285,8 +10297,8 @@ function submit(event){
 function category(points){if(points>=90)return 'DEEP CUT';if(points>=70)return 'RARE PICK';if(points>=50)return 'UNCOMMON';if(points>=25)return 'SOLID KNOWLEDGE';return 'POPULAR PICK';}
 function finalize(entry){if(locked)return;locked=true;setSuspense(false);cancelAnimationFrame(ticker);byId('answerInput').disabled=true;byId('submitAnswer').disabled=true;byId('answerForm').classList.add('hide');byId('answerSuggestions').classList.add('hide');byId('nextButton').classList.remove('hide');const points=entry?entry[1]:0;total+=points;answers.push({topic:questions[questionIndex].topic,prompt:questions[questionIndex].prompt,name:entry?entry[0]:'No accepted answer',points});moveRunner(total,!!entry);byId('feedback').classList.remove('hide','missed','surge-good');if(entry){triggerSurge(points);byId('feedbackBig').textContent=`+${points} METRES · ${category(points)}`;byId('feedbackMsg').textContent=entry[0]+' — on the board.';}else{byId('feedback').classList.add('missed');byId('feedbackBig').textContent='+0 METRES · TIME UP';byId('feedbackMsg').textContent='No accepted answer this round. Reset and go again on the next one.';}byId('nextButton').textContent=questionIndex===7?'SEE MY RESULT →':'NEXT QUESTION →';byId('announce').textContent=`${points} metres. ${category(points)}.`;}
 function nextQuestion(){if(!locked)return;questionIndex++;if(questionIndex>=questions.length){finishRun();return;}loadQuestion();}
-function finishRun(){cancelAnimationFrame(ticker);const correct=answers.filter(a=>a.points>0).length;const result={date:utcDate(),total,answers,correct};if(mode==='daily'){try{localStorage.setItem(dailyStorageKey(),JSON.stringify(result));}catch{}}showResults(result);}
-function showResults(result){setSuspense(false);moveRunner(result.total);renderSharePoster(result);byId('resultsTitle').textContent=result.total>=550?'ELITE KNOWLEDGE.':result.total>=350?'GREAT RACE.':result.total>=170?'NICE RUN.':'THE FINISH LINE.';byId('resultsSubtitle').textContent=(result.date||utcDate())+' · '+(mode==='daily'?'Daily heat':'Practice heat')+' · 8 rounds';byId('finalScore').textContent=result.total;byId('finalHits').textContent=result.correct+' / 8';byId('answerReview').innerHTML='';(result.answers||[]).forEach((a,i)=>{const item=document.createElement('div');item.className='review-item';const n=document.createElement('div');n.className='review-index';n.textContent=String(i+1).padStart(2,'0');const answer=document.createElement('div');answer.className='review-name';const title=document.createElement('div');title.textContent=a.name;const sub=document.createElement('div');sub.className='review-topic';sub.textContent=a.topic;answer.append(title,sub);const pts=document.createElement('div');pts.className='review-score';pts.textContent='+'+a.points;item.append(n,answer,pts);byId('answerReview').appendChild(item);});byId('practiceAgain').textContent='PRACTICE AGAIN';descendTo('results');}
+function finishRun(){cancelAnimationFrame(ticker);const correct=answers.filter(a=>a.points>0).length;const result={date:utcDate(),total,answers,correct};try{localStorage.setItem(dailyStorageKey(),JSON.stringify(result));}catch{}showResults(result);}
+function showResults(result){setSuspense(false);moveRunner(result.total);renderSharePoster(result);byId('resultsTitle').textContent=result.total>=550?'ELITE KNOWLEDGE.':result.total>=350?'GREAT RACE.':result.total>=170?'NICE RUN.':'THE FINISH LINE.';byId('resultsSubtitle').textContent=(result.date||utcDate())+' · '+'Daily heat'+' · 8 rounds';byId('finalScore').textContent=result.total;byId('finalHits').textContent=result.correct+' / 8';byId('answerReview').innerHTML='';(result.answers||[]).forEach((a,i)=>{const item=document.createElement('div');item.className='review-item';const n=document.createElement('div');n.className='review-index';n.textContent=String(i+1).padStart(2,'0');const answer=document.createElement('div');answer.className='review-name';const title=document.createElement('div');title.textContent=a.name;const sub=document.createElement('div');sub.className='review-topic';sub.textContent=a.topic;answer.append(title,sub);const pts=document.createElement('div');pts.className='review-score';pts.textContent='+'+a.points;item.append(n,answer,pts);byId('answerReview').appendChild(item);});descendTo('results');}
 
 // Share card: a spoiler-free visual that fits a single mobile screenshot.
 function scoreHeadline(metres){return metres>=640?'LEGENDARY<br>LANE.':metres>=470?'OUTSIDE<br>THE PACK.':metres>=270?'STRONG<br>FINISH.':'KEEP<br>CHASING.';}
@@ -10342,8 +10354,8 @@ function paintMatrixCanvas(ctx,value,x,y,pixel,gap,digitSpace){
   ctx.restore();return totalW;
 }
 function renderSharePoster(result){
-  byId('posterDay').textContent=readableDate(result.date);byId('posterMode').textContent=(mode==='daily'?'DAILY HEAT':'PRACTICE')+' · 800M';
-  byId('resultsDayLabel').textContent=(mode==='daily'?'DAILY':'PRACTICE')+' · '+readableDate(result.date);
+  byId('posterDay').textContent=readableDate(result.date);byId('posterMode').textContent='DAILY HEAT'+' · 800M';
+  byId('resultsDayLabel').textContent='DAILY'+' · '+readableDate(result.date);
   byId('posterTitle').innerHTML=scoreHeadline(result.total);
   renderMatrixScore(result.total);
   const rounds=(result.answers||[]).slice(0,8);
@@ -10418,7 +10430,7 @@ function paintPoster(result){
   const line=(a,b,c,d,color='#ffffff70',width=2)=>{g.strokeStyle=color;g.lineWidth=width;g.beginPath();g.moveTo(a,b);g.lineTo(c,d);g.stroke();};
   const rect=(x,y,w,h,r,fill,stroke=null,sw=1)=>{g.beginPath();g.roundRect(x,y,w,h,r);g.fillStyle=fill;g.fill();if(stroke){g.strokeStyle=stroke;g.lineWidth=sw;g.stroke()}};
   write(readableDate(result.date),70,88,27,'900','#ffe3cf');
-  write((mode==='daily'?'DAILY HEAT':'PRACTICE HEAT')+' · 800M',1007,88,26,'900','#ffe3cf','right');
+  write('DAILY HEAT'+' · 800M',1007,88,26,'900','#ffe3cf','right');
   // Sunflower-yellow trackside timer housing, with the OUTSIDELANE name rather than a copied sponsor mark.
   g.save();g.shadowColor='#1f0f0fb0';g.shadowBlur=30;g.shadowOffsetY=19;
   const rim=g.createLinearGradient(60,143,1030,550);rim.addColorStop(0,'#fff36c');rim.addColorStop(.4,'#fbd016');rim.addColorStop(1,'#dba400');
@@ -10466,17 +10478,17 @@ function paintPoster(result){
   return c;
 }
 function makePosterBlob(result){return new Promise((resolve,reject)=>{const canvas=paintPoster(result);canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('Unable to create the image.')),'image/png');});}
-function activeResult(){return mode==='daily'?(readSaved()||{date:utcDate(),total,answers}):{date:utcDate(),total,answers};}
+function activeResult(){return readSaved()||{date:utcDate(),total,answers};}
 function imageFilename(result){return 'outsidelane-'+(result.date||utcDate())+'-'+result.total+'m.png';}
 function downloadPoster(blob,filename){const a=document.createElement('a');const url=URL.createObjectURL(blob);a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1200);}
 async function saveImage(){const btn=byId('saveScoreImage');btn.disabled=true;byId('shareStatus').textContent='Creating your scorecard…';try{const r=activeResult();downloadPoster(await makePosterBlob(r),imageFilename(r));byId('shareStatus').textContent='Scorecard downloaded. Ready to post.';}catch(e){byId('shareStatus').textContent='Could not create the image in this browser.';}finally{btn.disabled=false;}}
 async function shareImage(){const btn=byId('shareScoreImage');btn.disabled=true;byId('shareStatus').textContent='Preparing your share card…';try{const r=activeResult(),blob=await makePosterBlob(r),file=new File([blob],imageFilename(r),{type:'image/png'});if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){byId('shareStatus').textContent='Choose where to share your result.';await navigator.share({files:[file],title:'OUTSIDELANE · '+r.total+'/800m',text:'Think outside the box. Run obscure.'});byId('shareStatus').textContent='Share action completed.';}else{downloadPoster(blob,file.name);byId('shareStatus').textContent='Image downloaded — share it anywhere.';}}catch(e){byId('shareStatus').textContent=e?.name==='AbortError'?'Sharing cancelled.':'Could not share; try Save Image instead.';}finally{btn.disabled=false;}}
 function deployedGameUrl(){return /^https?:$/.test(location.protocol)&&!['localhost','127.0.0.1'].includes(location.hostname)?location.origin+location.pathname:null;}
-function getShareText(){const data=mode==='daily'?(readSaved()||{total,answers}):{total,answers};const squares=(data.answers||[]).map(a=>a.points>=90?'🟩':a.points>=70?'🟨':a.points>=50?'🟧':a.points>0?'🟫':'⬛').join('');return `OUTSIDELANE · ${mode==='daily'?'Daily':'Practice'} ${utcDate()}\n🏃 ${data.total}/800 metres\n${squares}\n8 questions. 25 seconds each. How rare are you?${deployedGameUrl()?'\n'+deployedGameUrl():''}`}
+function getShareText(){const data=readSaved()||{total,answers};const squares=(data.answers||[]).map(a=>a.points>=90?'🟩':a.points>=70?'🟨':a.points>=50?'🟧':a.points>0?'🟫':'⬛').join('');return `OUTSIDELANE · Daily ${utcDate()}\n🏃 ${data.total}/800 metres\n${squares}\n8 questions. 25 seconds each. How rare are you?${deployedGameUrl()?'\n'+deployedGameUrl():''}`}
 async function share(){const message=getShareText();try{if(navigator.clipboard){await navigator.clipboard.writeText(message);byId('shareStatus').textContent='Spoiler-free score copied to clipboard.';return;}}catch(e){}window.prompt('Copy your result:',message);}
 byId('saveScoreImage').addEventListener('click',saveImage);
 byId('shareScoreImage').addEventListener('click',shareImage);
-byId('startDaily').addEventListener('click',()=>{const saved=readSaved();if(saved){mode='daily';showResults(saved);}else startRun('daily');});byId('startPractice').addEventListener('click',()=>startRun('practice'));byId('practiceAgain').addEventListener('click',()=>startRun('practice'));byId('answerForm').addEventListener('submit',submit);byId('answerInput').addEventListener('input',event=>{if(locked)return;byId('validationMessage').textContent='';renderSuggestions(event.target.value);});byId('nextButton').addEventListener('click',nextQuestion);byId('shareResult').addEventListener('click',share);document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!locked&&questions.length)updateClock();});buildStages();showWelcome();
+byId('startDaily').addEventListener('click',()=>{const saved=readSaved();if(saved)showResults(saved);else startRun();});byId('answerForm').addEventListener('submit',submit);byId('answerInput').addEventListener('input',event=>{if(locked)return;byId('validationMessage').textContent='';renderSuggestions(event.target.value);});byId('nextButton').addEventListener('click',nextQuestion);byId('shareResult').addEventListener('click',share);document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!locked&&questions.length)updateClock();});buildStages();showWelcome();
 </script>
 </body>
 </html>
