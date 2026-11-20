@@ -400,17 +400,43 @@
       .matrix-character.clock-digit-turn .matrix-pixel.is-lit,
       .mini-matrix-character.clock-digit-turn .mini-matrix-pixel.is-lit{animation:none!important}
     }
+
+/* OUTSIDELANE logo behaves as a subtle way back to the top/start. */
+.brand-home{appearance:none;border:0;background:transparent;color:inherit;cursor:pointer;padding:0;font-family:inherit;text-align:left}
+.brand-home:focus-visible,.result-wordmark-home:focus-visible{outline:2px solid #fff29b;outline-offset:4px;border-radius:4px}
+.result-wordmark-home{appearance:none;border:0;background:transparent;text-align:left;color:#171716;cursor:pointer;padding:0;font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.result-wordmark-home:hover,.brand-home:hover{filter:brightness(1.1)}
+/* Per-dot 15-column score reveal, each column with its own top-to-bottom cascade. */
+.matrix-pixel.score-dot-reveal{animation:scoreColumnFlicker 440ms steps(1,end) both;animation-delay:var(--dot-delay,0ms);transform-origin:50% 50%}
+@keyframes scoreColumnFlicker{
+  0%,11%{background:#414841;opacity:.16;box-shadow:none;transform:perspective(95px) rotateX(80deg)}
+  12%,23%{background:#fff59b;opacity:1;box-shadow:0 0 1.3cqw #ffff88;transform:perspective(95px) rotateX(25deg)}
+  24%,40%{background:#55594a;opacity:.24;box-shadow:none;transform:perspective(95px) rotateX(8deg)}
+  41%,56%{background:#fcfa69;opacity:1;box-shadow:0 0 1.1cqw #ffff70;transform:rotateX(0deg)}
+  57%,70%{background:#50564a;opacity:.2;box-shadow:none}
+  71%,86%{background:#fffb9b;opacity:1;box-shadow:0 0 1.2cqw #ffff94}
+  87%,100%{background:var(--settle-color);opacity:var(--settle-opacity);box-shadow:var(--settle-glow);transform:none}
+}
+/* Actual 5x7 square dots for every result in the METRES split column. */
+.poster-split{grid-template-columns:4cqw minmax(0,1fr) 15cqw 10.5cqw!important}
+.poster-split-points{display:flex;align-items:center;justify-content:flex-end;gap:.65cqw;font-size:3cqw}
+.split-matrix-digits{display:flex;align-items:center;gap:.58cqw}
+.split-matrix-character{--sd:clamp(.9px,.30cqw,2.15px);--sg:clamp(.2px,.09cqw,.64px);display:grid;grid-template-columns:repeat(5,var(--sd));grid-template-rows:repeat(7,var(--sd));gap:var(--sg)}
+.split-matrix-pixel{display:block;width:var(--sd);height:var(--sd);background:#ffdac6;opacity:.15;border-radius:.1cqw}
+.split-matrix-pixel.is-lit{opacity:1;background:#fffaf0;box-shadow:0 0 .5cqw #ffffff6b}
+.split-matrix-unit{font-size:3cqw;line-height:1;font-weight:950;color:#fff9ef}
+@media(prefers-reduced-motion:reduce){.matrix-pixel.score-dot-reveal{animation:none!important}}
 </style>
 </head>
 <body>
 <div class="app">
-  <header class="top"><div class="brand"><div class="brand-badge">OL</div>OUTSIDELANE<span style="color:#fff">.</span></div><div class="top-right">The athletics daily</div></header>
+  <header class="top"><button id="brandHome" class="brand brand-home" type="button" aria-label="OUTSIDELANE: return to the start" title="Back to the start"><span class="brand-badge">OL</span>OUTSIDELANE</button><div class="top-right">The athletics daily</div></header>
   <section id="intro" class="hero"><div class="kicker"><span class="live-dot"></span> THE DAILY START LINE</div><h1>Think outside.<br><em>Run obscure.</em></h1><p class="sub">Think outside the box. Find the rarest answer. Eight athletics questions, 25 seconds each — and a race to the outside lane.</p></section>
   <section id="raceCard" class="race-card" aria-label="Race track showing your score">
     <div class="race-top">
       <div class="race-label-group"><span id="raceLabel">DAILY RACE</span><span class="race-label-sub">800M · 8 QUESTIONS</span></div>
       <div class="race-clock" id="raceClock" role="img" aria-label="Score 0 out of 800 metres">
-        <div class="race-clock-brand">OUTSIDELANE<span>.</span></div>
+        <div class="race-clock-brand">OUTSIDELANE</div>
         <div class="race-clock-screen"><div id="raceClockDigits" class="race-clock-digits" aria-hidden="true"></div></div>
         <div class="race-clock-footer"><span>METRES</span></div>
       </div>
@@ -479,7 +505,7 @@
         
         <div class="poster-edition"><span id="posterDay">20 NOV 2026</span><span id="posterMode">DAILY HEAT · 800M</span></div>
         <div class="matrix-frame" aria-label="Trackside-style finish scoreboard">
-          <div class="matrix-header"><span class="matrix-brand">OUTSIDELANE<span>.</span></span><span class="matrix-headmeta">ATHLETICS<br>RESULTS</span></div>
+          <div class="matrix-header"><button id="resultWordmark" type="button" class="matrix-brand result-wordmark-home" aria-label="Back to OUTSIDELANE start" title="Back to the start">OUTSIDELANE</button><span class="matrix-headmeta">ATHLETICS<br>RESULTS</span></div>
           <div class="matrix-screen">
             <div class="matrix-screen-top"><span>FINISH RESULT</span><span>FINAL SCORE</span></div>
             <button id="posterScore" class="matrix-screen-value score-replay" type="button" aria-label="Replay the score animation" title="Replay the score animation"></button>
@@ -10491,9 +10517,49 @@ function renderMiniClock(value,animated=false){
   rollClockDigits('raceClockDigits',value,'mini',animated,0);
   byId('raceClock').setAttribute('aria-label','Score '+Math.round(Number(value)||0)+' out of 800 metres');
 }
+// The results reveal is a physical 15-column LED sweep, five columns per
+// numeral. Every square flickers independently, proceeding left to right.
 function renderMatrixScore(value,animated=false,baseDelay=760){
-  rollClockDigits('posterScore',value,'large',animated,baseDelay);
-  byId('posterScore').setAttribute('aria-label','Score '+Number(value)+' metres. Replay the clock animation');
+  cancelClockRoll('posterScore');
+  const target=byId('posterScore'),digits=scoreboardDigits(value);
+  const reveal=!!animated&&flipMotionEnabled();
+  const fragment=document.createDocumentFragment();
+  for(let d=0;d<3;d++){
+    const glyph=createClockGlyph('large',digits[d]);
+    for(let row=0;row<7;row++)for(let col=0;col<5;col++){
+      const dot=glyph.children[row*5+col];
+      if(!reveal)continue;
+      const lit=MATRIX_DIGITS[digits[d]][row][col]==='1';
+      const globalColumn=d*5+col;
+      // A new vertical column starts before the previous column settles.
+      const delay=baseDelay+globalColumn*96+row*20;
+      dot.classList.add('score-dot-reveal');
+      dot.style.setProperty('--dot-delay',delay+'ms');
+      dot.style.setProperty('--settle-opacity',lit?'1':'.22');
+      dot.style.setProperty('--settle-color',lit?'#f5f92d':'#595d46');
+      dot.style.setProperty('--settle-glow',lit?'0 0 .2cqw #fbff65, 0 0 1.1cqw #daec3275':'none');
+    }
+    fragment.appendChild(glyph);
+  }
+  target.replaceChildren(fragment);
+  target.dataset.digits=digits;
+  target.setAttribute('aria-label','Score '+Number(value)+' metres. Replay the LED reveal');
+}
+function paintSplitMatrixNumber(ctx,value,xRight,yTop){
+  const digits=String(value),dot=3.1,gap=1.15,spacing=4.2;
+  const glyphWidth=5*dot+4*gap,allWidth=digits.length*glyphWidth+(digits.length-1)*spacing;
+  const start=xRight-allWidth;
+  ctx.save();
+  for(let n=0;n<digits.length;n++){
+    const pattern=MATRIX_DIGITS[digits[n]];if(!pattern)continue;
+    for(let row=0;row<7;row++)for(let col=0;col<5;col++){
+      const lit=pattern[row][col]==='1';
+      ctx.globalAlpha=lit?1:.13;ctx.fillStyle=lit?'#fff9e5':'#ffd8ba';
+      if(lit){ctx.shadowColor='#fff9e5';ctx.shadowBlur=2;}else{ctx.shadowBlur=0;}
+      ctx.fillRect(start+n*(glyphWidth+spacing)+col*(dot+gap),yTop+row*(dot+gap),dot,dot);
+    }
+  }
+  ctx.restore();
 }
 function paintMatrixCanvas(ctx,value,x,y,pixel,gap,digitSpace){
   const digits=scoreboardDigits(value),digitW=5*pixel+4*gap,totalW=3*digitW+2*digitSpace;
@@ -10520,7 +10586,18 @@ function renderSharePoster(result){
     const num=document.createElement('span');num.className='poster-split-num';num.textContent=String(i+1).padStart(2,'0');
     const bar=document.createElement('span');bar.className='poster-split-bar';const fill=document.createElement('span');fill.className='poster-split-fill';fill.style.display='block';fill.style.setProperty('--split-width',Math.max(0,Math.min(points,100))+'%');fill.style.setProperty('--split-color',tier.color);bar.appendChild(fill);
     const label=document.createElement('span');label.className='poster-split-tier';label.textContent=tier.label;
-    const score=document.createElement('span');score.className='poster-split-points';score.textContent=points+'m';
+    const score=document.createElement('span');score.className='poster-split-points';
+    const matrix=document.createElement('span');matrix.className='split-matrix-digits';matrix.setAttribute('aria-hidden','true');
+    for(const number of String(points)){
+      const glyph=document.createElement('span');glyph.className='split-matrix-character';
+      for(const rowBits of MATRIX_DIGITS[number])for(const bit of rowBits){
+        const dot=document.createElement('i');dot.className='split-matrix-pixel'+(bit==='1'?' is-lit':'');
+        glyph.appendChild(dot);
+      }
+      matrix.appendChild(glyph);
+    }
+    const unit=document.createElement('span');unit.className='split-matrix-unit';unit.textContent='m';
+    score.append(matrix,unit);
     row.append(num,bar,label,score);target.appendChild(row);
   }
   byId('shareStatus').textContent='SELECT A SPLIT TO EXPLORE';
@@ -10591,7 +10668,7 @@ function paintPoster(result){
   line(86,150,994,150,'#ffef94',5);
   // Match the site's sans-serif OUTSIDELANE logo rather than a serif clock wordmark.
   g.save();g.letterSpacing='-1.5px';
-  write('OUTSIDELANE.',97,241,68,'900','#1d1d18','left','Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif');
+  write('OUTSIDELANE',97,241,68,'900','#1d1d18','left','Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif');
   g.restore();
   write('ATHLETICS',973,198,20,'1000','#35300d','right');write('RESULTS',973,225,20,'1000','#35300d','right');
   // Recessed dark LED board and realistic unlit squares behind illuminated square pixels.
@@ -10619,7 +10696,7 @@ function paintPoster(result){
     write(String(i+1).padStart(2,'0'),73,y+25,22,'900','#f1ccbf');
     rect(135,y+10,475,14,7,'#ffffff27');
     if(points>0)rect(135,y+10,Math.max(7,475*Math.min(100,points)/100),14,7,t.color);
-    write(t.label,651,y+26,22,'900','#f5d5c8');write(points+'m',1007,y+28,30,'1000','#fff','right');
+    write(t.label,651,y+26,22,'900','#f5d5c8');paintSplitMatrixNumber(g,points,976,y+6);write('m',1007,y+29,24,'900','#fff','right');
     if(i<7)line(71,y+42,1010,y+42,'#ffffff23',1);
   }
   line(70,1282,1010,1282,'#ffffff8a',2);
@@ -10638,6 +10715,11 @@ function deployedGameUrl(){return /^https?:$/.test(location.protocol)&&!['localh
 function getShareText(){const data=readSaved()||{total,answers};const squares=(data.answers||[]).map(a=>a.points>=90?'🟩':a.points>=70?'🟨':a.points>=50?'🟧':a.points>0?'🟫':'⬛').join('');return `OUTSIDELANE · Daily ${utcDate()}\n🏃 ${data.total}/800 metres\n${squares}\n8 questions. 25 seconds each. How rare are you?${deployedGameUrl()?'\n'+deployedGameUrl():''}`}
 async function share(){const message=getShareText();try{if(navigator.clipboard){await navigator.clipboard.writeText(message);byId('shareStatus').textContent='Spoiler-free score copied to clipboard.';return;}}catch(e){}window.prompt('Copy your result:',message);}
 byId('backToHome').addEventListener('click',()=>showWelcome());
+byId('resultWordmark').addEventListener('click',()=>showWelcome());
+byId('brandHome').addEventListener('click',()=>{
+  const stage=document.querySelector('.app').dataset.stage;
+  if(stage==='results'||stage==='home')showWelcome();
+});
 byId('posterScore').addEventListener('click',()=>renderMatrixScore(activeResult().total,true,25));
 byId('saveScoreImage').addEventListener('click',saveImage);
 byId('shareScoreImage').addEventListener('click',shareImage);
