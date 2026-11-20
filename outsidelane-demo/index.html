@@ -373,6 +373,33 @@
 @keyframes dominoOldFaceSpark{0%,17%{opacity:var(--old-opacity);background:#51584c}18%,27%{opacity:1;background:#fffbc1;box-shadow:0 0 6px #fbf675}28%,100%{opacity:var(--old-opacity);background:#51584c;box-shadow:none}}
 @keyframes dominoNewFaceSpark{0%,53%{opacity:.23;background:#51584c;box-shadow:none}54%,63%{opacity:1;background:#fffbd2;box-shadow:0 0 9px #fbf56f}64%,71%{opacity:.18;background:#51584c;box-shadow:none}72%,83%{opacity:1;background:#fff6aa;box-shadow:0 0 7px #fff27a}84%,100%{opacity:var(--new-opacity);background:var(--new-face);box-shadow:var(--new-glow)}}
 @media(prefers-reduced-motion:reduce){.matrix-pixel.flip-pixel,.mini-matrix-pixel.flip-pixel,.matrix-pixel.flip-pixel::before,.matrix-pixel.flip-pixel::after,.mini-matrix-pixel.flip-pixel::before,.mini-matrix-pixel.flip-pixel::after{animation:none!important}}
+
+    /* Overlapping airport-board digit cycles: one *whole number* flips at a time. */
+    .matrix-character,.mini-matrix-character{transform-origin:50% 50%;will-change:transform,filter}
+    .matrix-character.clock-digit-turn,.mini-matrix-character.clock-digit-turn{
+      animation:clockColumnFlip 150ms cubic-bezier(.22,.8,.32,1) both;
+    }
+    .mini-matrix-character.clock-digit-turn{animation-duration:110ms}
+    .matrix-character.clock-digit-turn .matrix-pixel.is-lit,
+    .mini-matrix-character.clock-digit-turn .mini-matrix-pixel.is-lit{
+      animation:clockDotFlash 150ms ease-out both;
+    }
+    .mini-matrix-character.clock-digit-turn .mini-matrix-pixel.is-lit{animation-duration:110ms}
+    @keyframes clockColumnFlip{
+      0%{transform:perspective(330px) rotateX(-75deg) translateY(-2px);filter:brightness(.55);opacity:.35}
+      42%{transform:perspective(330px) rotateX(-12deg);filter:brightness(2.2);opacity:.92}
+      100%{transform:perspective(330px) rotateX(0);filter:brightness(1);opacity:1}
+    }
+    @keyframes clockDotFlash{
+      0%{opacity:.1;filter:brightness(.5)}
+      52%{opacity:1;filter:brightness(2.2)}
+      100%{opacity:1;filter:brightness(1)}
+    }
+    @media(prefers-reduced-motion:reduce){
+      .matrix-character.clock-digit-turn,.mini-matrix-character.clock-digit-turn,
+      .matrix-character.clock-digit-turn .matrix-pixel.is-lit,
+      .mini-matrix-character.clock-digit-turn .mini-matrix-pixel.is-lit{animation:none!important}
+    }
 </style>
 </head>
 <body>
@@ -10393,42 +10420,79 @@ function buildFlippingPixel(kind,oldOn,newOn,delay,animate){
   }
   return pixel;
 }
-function renderMiniClock(value,animated=false){
-  const target=byId('raceClockDigits');if(!target)return;
-  const digits=scoreboardDigits(value),previous=target.dataset.digits||'000';
-  const flip=!!animated&&flipMotionEnabled()&&previous!==digits;
-  const fragment=document.createDocumentFragment();
-  for(let d=0;d<3;d++){
-    const glyph=document.createElement('span');glyph.className='mini-matrix-character';
-    for(let row=0;row<7;row++)for(let col=0;col<5;col++){
-      const newOn=MATRIX_DIGITS[digits[d]][row][col]==='1';
-      const oldOn=MATRIX_DIGITS[previous[d]][row][col]==='1';
-      const order=row*15+d*5+col;
-      const delay=30+order*6;
-      glyph.appendChild(buildFlippingPixel('mini-matrix-pixel',oldOn,newOn,delay,flip));
-    }
-    fragment.appendChild(glyph);
+// Three rolling digit columns, like a vintage airport departures board.
+// Digits overlap in time: digit 2 starts before digit 1 settles, then digit 3
+// starts before digit 2 settles. Each digit keeps its 5x7 square LED glyph.
+const clockRollTimeouts=new Map();
+function cancelClockRoll(targetId){
+  for(const timer of clockRollTimeouts.get(targetId)||[])clearTimeout(timer);
+  clockRollTimeouts.delete(targetId);
+}
+function createClockGlyph(kind,character){
+  const glyph=document.createElement('span');
+  glyph.className=kind==='mini'?'mini-matrix-character':'matrix-character';
+  glyph.setAttribute('aria-hidden','true');
+  const pixelClass=kind==='mini'?'mini-matrix-pixel':'matrix-pixel';
+  for(const row of MATRIX_DIGITS[character])for(const bit of row){
+    const dot=document.createElement('i');
+    dot.className=pixelClass+(bit==='1'?' is-lit':'');
+    glyph.appendChild(dot);
   }
-  target.replaceChildren(fragment);target.dataset.digits=digits;
+  return glyph;
+}
+function setClockGlyph(glyph,character,animate){
+  const bits=MATRIX_DIGITS[character].join('');
+  const dots=glyph.children;
+  for(let n=0;n<dots.length;n++)dots[n].classList.toggle('is-lit',bits[n]==='1');
+  glyph.classList.remove('clock-digit-turn');
+  if(animate){
+    // Restart the single-digit mechanical flip for each cycling number.
+    void glyph.offsetWidth;
+    glyph.classList.add('clock-digit-turn');
+  }
+}
+function rollClockDigits(targetId,score,kind,animate,initialDelay=0){
+  const target=byId(targetId);if(!target)return;
+  cancelClockRoll(targetId);
+  const digits=scoreboardDigits(score);
+  const last=target.dataset.digits||'000';
+  const shouldRoll=!!animate&&flipMotionEnabled();
+  const fragment=document.createDocumentFragment(),glyphs=[];
+  for(let d=0;d<3;d++){
+    const glyph=createClockGlyph(kind,shouldRoll?'0':digits[d]);
+    fragment.appendChild(glyph);glyphs.push(glyph);
+  }
+  target.replaceChildren(fragment);
+  target.dataset.digits=digits;
+  if(!shouldRoll)return;
+  // 0/355/710 ms for the result board; 0/245/490 for race updates.
+  // Each column cycles for 900/660 ms, creating a deliberate overlap.
+  const stepTime=kind==='mini'?110:150;
+  const stagger=kind==='mini'?245:355;
+  const steps=kind==='mini'?6:6;
+  const timeoutIds=[];
+  for(let d=0;d<3;d++){
+    for(let step=0;step<steps;step++){
+      const ms=initialDelay+d*stagger+step*stepTime;
+      timeoutIds.push(setTimeout(()=>{
+        if(target.dataset.digits!==digits||!glyphs[d].isConnected)return;
+        const isLast=step===steps-1;
+        const destination=Number(digits[d]);
+        // Cycle through distinct intermediate numerals before landing on the actual score.
+        const shown=isLast?digits[d]:String((destination+7+step*3+d)%10);
+        setClockGlyph(glyphs[d],shown,true);
+      },ms));
+    }
+  }
+  clockRollTimeouts.set(targetId,timeoutIds);
+}
+function renderMiniClock(value,animated=false){
+  rollClockDigits('raceClockDigits',value,'mini',animated,0);
   byId('raceClock').setAttribute('aria-label','Score '+Math.round(Number(value)||0)+' out of 800 metres');
 }
 function renderMatrixScore(value,animated=false,baseDelay=760){
-  const target=byId('posterScore'),digits=scoreboardDigits(value);
-  const flip=!!animated&&flipMotionEnabled();
-  const fragment=document.createDocumentFragment();
-  for(let d=0;d<3;d++){
-    const glyph=document.createElement('span');glyph.className='matrix-character';glyph.setAttribute('aria-hidden','true');
-    for(let row=0;row<7;row++)for(let col=0;col<5;col++){
-      const newOn=MATRIX_DIGITS[digits[d]][row][col]==='1';
-      // A dark old face gives every LED tile an individual "arrival board" reveal.
-      const order=row*15+d*5+col;
-      const delay=baseDelay+order*12;
-      glyph.appendChild(buildFlippingPixel('matrix-pixel',false,newOn,delay,flip));
-    }
-    fragment.appendChild(glyph);
-  }
-  target.replaceChildren(fragment);
-  target.setAttribute('aria-label','Score '+Number(value)+' metres. Replay the clock animation');
+  rollClockDigits('posterScore',value,'large',animated,baseDelay);
+  byId('posterScore').setAttribute('aria-label','Score '+Number(value)+' metres. Replay the clock animation');
 }
 function paintMatrixCanvas(ctx,value,x,y,pixel,gap,digitSpace){
   const digits=scoreboardDigits(value),digitW=5*pixel+4*gap,totalW=3*digitW+2*digitSpace;
