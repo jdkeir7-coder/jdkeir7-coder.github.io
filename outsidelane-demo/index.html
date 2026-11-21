@@ -696,6 +696,50 @@
     padding:.12em .24em .15em!important;
   }
 }
+
+/* Wide stadium timing banner: OUTSIDELANE is to the LEFT of the yellow display. */
+.race-top .race-clock{
+  display:grid;grid-template-columns:minmax(0,1fr) 132px;grid-template-rows:1fr auto;
+  align-items:center;gap:3px 8px;width:286px;min-width:286px;
+  padding:7px 9px;border-radius:7px;
+}
+.race-top .race-clock-brand{
+  grid-column:1;grid-row:1;justify-self:start;text-align:left;
+  font-size:12px;letter-spacing:-.35px;line-height:1.1;
+}
+.race-top .race-clock-screen{grid-column:2;grid-row:1 / span 2;min-width:0;}
+.race-top .race-clock-footer{grid-column:1;grid-row:2;justify-self:start;}
+.home-stage .race-clock.clock-result-link{
+  cursor:pointer;transition:box-shadow .18s,transform .18s;
+}
+.home-stage .race-clock.clock-result-link:hover{
+  transform:translateY(-2px);box-shadow:0 4px 0 #98600c,0 11px 24px #40151785,0 0 0 3px #fff5;
+}
+.home-stage .race-clock.clock-result-link:focus-visible{
+  outline:3px solid white;outline-offset:4px;
+}
+@media(max-width:520px){
+ .race-top .race-clock{grid-template-columns:minmax(0,1fr) 99px;width:211px;min-width:211px;gap:3px 5px;padding:5px 6px;}
+ .race-top .race-clock-brand{font-size:9px;letter-spacing:-.55px;}
+ .race-top .race-clock-digits{--mini-dot:2.55px;--mini-gap:.9px;gap:3px}
+ .race-top .race-clock-screen{min-height:33px;padding:3px 1px;}
+ .race-top .race-clock-footer{font-size:7px;}
+}
+/* Clean, legible illustrated athlete; coordinated running form instead of flickering pixel sheet. */
+.athlete-figure{filter:drop-shadow(1px 2px 1px #29141988);animation:athlete-bob .42s ease-in-out infinite alternate;}
+.athlete-leg,.athlete-arm{transform-box:view-box;transform-origin:0px 0px;}
+.athlete-leg-front{animation:leg-front .58s ease-in-out infinite alternate;}
+.athlete-leg-back{animation:leg-back .58s ease-in-out infinite alternate;}
+.athlete-arm-front{animation:arm-front .58s ease-in-out infinite alternate;}
+.athlete-arm-back{animation:arm-back .58s ease-in-out infinite alternate;}
+@keyframes athlete-bob{from{transform:translateY(0)}to{transform:translateY(-1.5px)}}
+@keyframes leg-front{from{transform:rotate(-9deg)}to{transform:rotate(8deg)}}
+@keyframes leg-back{from{transform:rotate(9deg)}to{transform:rotate(-8deg)}}
+@keyframes arm-front{from{transform:translateX(-1px)}to{transform:translateX(1px)}}
+@keyframes arm-back{from{transform:translateX(1px)}to{transform:translateX(-1px)}}
+@media(prefers-reduced-motion:reduce){
+  .athlete-figure,.athlete-leg,.athlete-arm{animation:none!important}
+}
 </style>
 </head>
 <body>
@@ -736,9 +780,34 @@
         </g>
         <ellipse class="shadow" cx="0" cy="19" rx="13" ry="4.6"/>
         <g id="spriteFacing">
-          <svg id="pixelRunner" x="-32" y="-42" width="64" height="85" viewBox="0 0 30 40" overflow="hidden" aria-hidden="true">
-            <image href="data:image/png;base64,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" x="0" y="0" width="180" height="40" style="image-rendering:pixelated"/>
-          </svg>
+          <g id="pixelRunner" class="athlete-figure" aria-hidden="true">
+            <!-- Simplified athletics runner: clean silhouette, distinct limbs and a forward lean. -->
+            <g class="athlete-leg athlete-leg-back">
+              <path d="M-2 0L-12 11L-21 13" fill="none" stroke="#24202a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M-2 0L-12 11L-21 13" fill="none" stroke="#f3b98c" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M-21 13L-27 14" fill="none" stroke="#f1f4f0" stroke-width="5" stroke-linecap="round"/>
+            </g>
+            <g class="athlete-arm athlete-arm-back">
+              <path d="M-3 -19L-13 -11L-17 -19" fill="none" stroke="#28202a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M-3 -19L-13 -11L-17 -19" fill="none" stroke="#c98662" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>
+            <g class="athlete-leg athlete-leg-front">
+              <path d="M-1 -1L12 8L21 20" fill="none" stroke="#211d29" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M-1 -1L12 8L21 20" fill="none" stroke="#f6bb8b" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M20 20L29 20" fill="none" stroke="#f8fbf5" stroke-width="5.5" stroke-linecap="round"/>
+              <path d="M22 22L30 22" fill="none" stroke="#72e5d4" stroke-width="2.5" stroke-linecap="round"/>
+            </g>
+            <path d="M-10 -20L5 -23L9 -7L-5 -4Z" fill="#f5f1e9" stroke="#25212d" stroke-width="2.5" stroke-linejoin="round"/>
+            <path d="M-5 -20L5 -21L8 -12L-3 -10Z" fill="#d9434b"/>
+            <path d="M-6 -6L9 -9L9 1L-4 3Z" fill="#26365b" stroke="#25212d" stroke-width="2.5" stroke-linejoin="round"/>
+            <path d="M-8 -32Q-4 -39 5 -38Q13 -37 14 -28L11 -21L0 -20L-6 -24Z" fill="#f4bd8e" stroke="#28202a" stroke-width="2.5"/>
+            <path d="M-8 -31Q-4 -41 6 -40L13 -36L12 -32L3 -34L-4 -29Z" fill="#29232d"/>
+            <path d="M5 -29L7 -29" stroke="#29232d" stroke-width="2" stroke-linecap="round"/>
+            <g class="athlete-arm athlete-arm-front">
+              <path d="M4 -20L15 -12L22 -19" fill="none" stroke="#28202a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M4 -20L15 -12L22 -19" fill="none" stroke="#f2b689" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>
+          </g>
         </g>
       </g>
     </svg>
@@ -10669,13 +10738,11 @@ function moveRunner(metres,animated=false){
   if(chip){chip.textContent=Math.round(metres)+'m';chip.setAttribute('aria-label','Current total '+Math.round(metres)+' metres');}
   renderMiniClock(metres,animated);
 }
-// Image sprite is a single local sheet; no network service or graphics library needed.
-let pixelFrame=0;
-setInterval(()=>{if(document.hidden)return;const sprite=byId('pixelRunner');if(!sprite)return;pixelFrame=(pixelFrame+1)%6;sprite.setAttribute('viewBox',`${pixelFrame*30} 0 30 40`);},105);
+// The runner is now an SVG athlete with lightweight CSS motion, not a raster sprite.
 
 function setSuspense(active){byId('raceCard').classList.toggle('critical',active);byId('timer').classList.toggle('pulse',active);byId('raceCard').querySelector('.track').classList.toggle('suspense',active);}
 function triggerSurge(points){const badge=byId('surgeBadge');const race=byId('raceCard');const feedback=byId('feedback');clearTimeout(surgeTimer);badge.textContent=points>=100?'VERY RARE!':points>=85?'DEEP CUT!':points>=60?'RARE PICK!':points>=30?'SOLID PICK!':'ON THE BOARD!';badge.classList.remove('show');race.classList.remove('surge');feedback.classList.remove('surge-good');void badge.offsetWidth;void race.offsetWidth;badge.classList.add('show');race.classList.add('surge');feedback.classList.add('surge-good');surgeTimer=setTimeout(()=>{race.classList.remove('surge');feedback.classList.remove('surge-good');},900);}
-function showWelcome(){clearTimeout(returnNextTimer);returnNextTimer=0;returnKeyWantsNext=false;byId('sharePoster').classList.remove('result-intro');cancelAnimationFrame(ticker);setSuspense(false);resetSprint();document.querySelector('.app').classList.remove('answer-reveal','keyboard-open','keyboard-tight');const played=readSaved();byId('dateLabel').textContent='DAILY HEAT · '+new Date(utcDate()+'T12:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short',timeZone:'UTC'}).toUpperCase();byId('homePanel').querySelector('h2').textContent=played?'Your daily race is complete.':'How far can you go?';byId('homePanel').querySelector('p').textContent=played?'Your result is saved on this device. A new heat arrives tomorrow.':'Broad prompts with dozens or hundreds of correct athletes. The rarer your answer, the further you run.';byId('startDaily').querySelector('.home-start-label').textContent=played?'VIEW TODAY’S RESULT':"RUN TODAY'S HEAT";byId('raceLabel').textContent='DAILY RACE';moveRunner(played?played.total:0);byId('home-raceClockDigits').innerHTML=byId('raceClockDigits').innerHTML;showPanel('homePanel');}
+function showWelcome(){clearTimeout(returnNextTimer);returnNextTimer=0;returnKeyWantsNext=false;byId('sharePoster').classList.remove('result-intro');cancelAnimationFrame(ticker);setSuspense(false);resetSprint();document.querySelector('.app').classList.remove('answer-reveal','keyboard-open','keyboard-tight');const played=readSaved();const homeClock=byId('home-raceClock');if(homeClock){homeClock.classList.toggle('clock-result-link',!!played);homeClock.setAttribute('role',played?'button':'img');homeClock.tabIndex=played?0:-1;homeClock.title=played?'View today’s result':'';homeClock.setAttribute('aria-label',played?'View today’s completed OutsideLane result':'Daily score clock');}byId('dateLabel').textContent='DAILY HEAT · '+new Date(utcDate()+'T12:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short',timeZone:'UTC'}).toUpperCase();byId('homePanel').querySelector('h2').textContent=played?'Your daily race is complete.':'How far can you go?';byId('homePanel').querySelector('p').textContent=played?'Your result is saved on this device. A new heat arrives tomorrow.':'Broad prompts with dozens or hundreds of correct athletes. The rarer your answer, the further you run.';byId('startDaily').querySelector('.home-start-label').textContent=played?'VIEW TODAY’S RESULT':"RUN TODAY'S HEAT";byId('raceLabel').textContent='DAILY RACE';moveRunner(played?played.total:0);byId('home-raceClockDigits').innerHTML=byId('raceClockDigits').innerHTML;showPanel('homePanel');}
 function readSaved(){try{const v=localStorage.getItem(dailyStorageKey());return v?JSON.parse(v):null;}catch{return null;}}
 function mobileGameDevice(){return window.matchMedia('(max-width:700px) and (pointer:coarse)').matches;}
 function startRun(){cancelAnimationFrame(ticker);setSuspense(false);resetSprint();questions=selectQuestions();questionIndex=0;total=0;answers=[];locked=false;byId('raceLabel').textContent='TODAY’S HEAT';moveRunner(0);descendTo('game');if(mobileGameDevice()){loadQuestion();return;}setTimeout(()=>{if(document.querySelector('.app').dataset.stage==='game')loadQuestion();},window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:850);}
@@ -11113,6 +11180,9 @@ byId('shareScoreImage').addEventListener('click',shareImage);
 // Starting from a synchronous tap keeps mobile keyboard focus working.
 byId('startDaily').disabled=true;
 questionBankReady.finally(()=>{byId('startDaily').disabled=false;});
+const homeClock=byId('home-raceClock');
+homeClock.addEventListener('click',()=>{const saved=readSaved();if(saved&&document.querySelector('.app').dataset.stage==='home')showResults(saved);});
+homeClock.addEventListener('keydown',event=>{if((event.key==='Enter'||event.key===' ')&&readSaved()&&document.querySelector('.app').dataset.stage==='home'){event.preventDefault();showResults(readSaved());}});
 byId('startDaily').addEventListener('click',()=>{const saved=readSaved();if(saved)showResults(saved);else startRun();});byId('answerForm').addEventListener('submit',submit);
 byId('answerInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing)returnKeyWantsNext=mobileGameDevice();});
 byId('submitAnswer').addEventListener('pointerdown',()=>{returnKeyWantsNext=false;});
