@@ -740,6 +740,76 @@
 @media(prefers-reduced-motion:reduce){
   .athlete-figure,.athlete-leg,.athlete-arm{animation:none!important}
 }
+
+/* Home layout repair: no squeezed track, clipped runner or stacked cards. */
+.home-stage{
+  justify-content:flex-start!important;align-items:stretch;
+  overflow-y:auto!important;overflow-x:hidden!important;
+  gap:clamp(10px,1.8vh,19px)!important;
+  padding:12px clamp(8px,2vw,18px) 32px!important;
+}
+.home-stage .hero{width:100%;max-width:100%!important;flex:0 0 auto;text-align:center}
+.home-stage .hero .oval-tagline{
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  flex-flow:row nowrap!important;gap:.22em!important;
+  width:100%;max-width:100%;margin:9px auto 10px!important;
+  font-size:clamp(18px,3.05vw,43px)!important;
+  font-weight:350!important;letter-spacing:-.045em!important;
+  line-height:1.28!important;white-space:nowrap!important;
+  color:#fff!important;
+}
+.home-stage .hero .oval-tagline .tagline-lead{font-weight:350!important;flex-shrink:1!important;min-width:0}
+.home-stage .hero .oval-tagline .track-oval{
+  border:1.5px solid #fff!important;border-radius:999px!important;
+  padding:.12em .34em .16em!important;
+  flex:0 0 auto;transform:none!important;white-space:nowrap;
+}
+.home-stage .hero .oval-tagline .track-oval em{
+  font-size:1.06em!important;font-style:italic!important;
+  font-weight:950!important;transform:none!important;
+  color:white!important;
+}
+.home-stage .hero .sub{max-width:650px!important;margin:0 auto;font-size:clamp(12px,1.3vw,14px)!important;line-height:1.5!important}
+.home-stage #welcomeStats{display:none!important}
+.home-stage .race-card{
+  display:block!important;flex:0 0 auto!important;
+  width:100%!important;height:auto!important;min-height:0!important;
+  overflow:visible!important;border-radius:20px!important;
+  padding:14px clamp(12px,2vw,22px) 8px!important;
+  box-sizing:border-box;
+}
+.home-stage .race-card .race-top{display:flex;min-height:74px!important}
+.home-stage .race-card .straight-track{
+  display:block!important;width:min(100%,510px)!important;
+  max-width:510px!important;height:auto!important;
+  margin:10px auto 4px!important;overflow:visible!important;
+}
+.home-stage > main{
+  display:block!important;position:static!important;
+  width:100%!important;flex:0 0 auto!important;
+  margin:0!important;
+}
+.home-stage #homePanel{width:100%;padding:16px 20px!important}
+.home-stage #homePanel #startDaily{min-height:52px!important}
+.home-stage .race-top .race-clock{max-width:54%;min-width:0;grid-template-columns:minmax(0,1fr) minmax(95px,132px)}
+.home-stage .race-clock-screen{overflow:hidden}
+@media(max-width:700px){
+  .home-stage .hero .oval-tagline{
+    font-size:clamp(12px,3.65vw,25px)!important;gap:.13em!important;
+    letter-spacing:-.055em!important;
+  }
+  .home-stage .hero .oval-tagline .track-oval{padding:.1em .25em .13em!important}
+  .home-stage .race-card .straight-track{width:min(100%,430px)!important;margin:12px auto 6px!important}
+  .home-stage .race-top .race-clock{max-width:65%;grid-template-columns:minmax(0,1fr) minmax(70px,110px)}
+  .home-stage #homePanel{padding:13px 15px!important}
+}
+@media(max-width:410px){
+  .home-stage .race-top .race-clock{max-width:62%;grid-template-columns:1fr}
+  .home-stage .race-top .race-clock-brand{grid-column:1;grid-row:1}
+  .home-stage .race-top .race-clock-screen{grid-column:1;grid-row:2}
+  .home-stage .race-top .race-clock-footer{grid-column:1;grid-row:3}
+  .home-stage .race-label-sub{white-space:normal!important}
+}
 </style>
 </head>
 <body>
@@ -10742,7 +10812,7 @@ function moveRunner(metres,animated=false){
 
 function setSuspense(active){byId('raceCard').classList.toggle('critical',active);byId('timer').classList.toggle('pulse',active);byId('raceCard').querySelector('.track').classList.toggle('suspense',active);}
 function triggerSurge(points){const badge=byId('surgeBadge');const race=byId('raceCard');const feedback=byId('feedback');clearTimeout(surgeTimer);badge.textContent=points>=100?'VERY RARE!':points>=85?'DEEP CUT!':points>=60?'RARE PICK!':points>=30?'SOLID PICK!':'ON THE BOARD!';badge.classList.remove('show');race.classList.remove('surge');feedback.classList.remove('surge-good');void badge.offsetWidth;void race.offsetWidth;badge.classList.add('show');race.classList.add('surge');feedback.classList.add('surge-good');surgeTimer=setTimeout(()=>{race.classList.remove('surge');feedback.classList.remove('surge-good');},900);}
-function showWelcome(){clearTimeout(returnNextTimer);returnNextTimer=0;returnKeyWantsNext=false;byId('sharePoster').classList.remove('result-intro');cancelAnimationFrame(ticker);setSuspense(false);resetSprint();document.querySelector('.app').classList.remove('answer-reveal','keyboard-open','keyboard-tight');const played=readSaved();const homeClock=byId('home-raceClock');if(homeClock){homeClock.classList.toggle('clock-result-link',!!played);homeClock.setAttribute('role',played?'button':'img');homeClock.tabIndex=played?0:-1;homeClock.title=played?'View today’s result':'';homeClock.setAttribute('aria-label',played?'View today’s completed OutsideLane result':'Daily score clock');}byId('dateLabel').textContent='DAILY HEAT · '+new Date(utcDate()+'T12:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short',timeZone:'UTC'}).toUpperCase();byId('homePanel').querySelector('h2').textContent=played?'Your daily race is complete.':'How far can you go?';byId('homePanel').querySelector('p').textContent=played?'Your result is saved on this device. A new heat arrives tomorrow.':'Broad prompts with dozens or hundreds of correct athletes. The rarer your answer, the further you run.';byId('startDaily').querySelector('.home-start-label').textContent=played?'VIEW TODAY’S RESULT':"RUN TODAY'S HEAT";byId('raceLabel').textContent='DAILY RACE';moveRunner(played?played.total:0);byId('home-raceClockDigits').innerHTML=byId('raceClockDigits').innerHTML;showPanel('homePanel');}
+function showWelcome(){clearTimeout(returnNextTimer);returnNextTimer=0;returnKeyWantsNext=false;byId('sharePoster').classList.remove('result-intro');cancelAnimationFrame(ticker);setSuspense(false);resetSprint();document.querySelector('.app').classList.remove('answer-reveal','keyboard-open','keyboard-tight');const played=readSaved();const homeClock=byId('home-raceClock');if(homeClock){homeClock.classList.toggle('clock-result-link',!!played);homeClock.setAttribute('role',played?'button':'img');homeClock.tabIndex=played?0:-1;homeClock.title=played?'View today’s result':'';homeClock.setAttribute('aria-label',played?'View today’s completed OutsideLane result':'Daily score clock');}byId('dateLabel').textContent='DAILY HEAT · '+new Date(utcDate()+'T12:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short',timeZone:'UTC'}).toUpperCase();byId('homePanel').querySelector('h2').textContent=played?'Your daily race is complete.':'How far can you go?';byId('homePanel').querySelector('p').textContent=played?'Your result is saved on this device. A new heat arrives tomorrow.':'Broad prompts with dozens or hundreds of correct athletes. The rarer your answer, the further you run.';byId('startDaily').querySelector('.home-start-label').textContent=played?'VIEW TODAY’S RESULT':"RUN TODAY'S HEAT";byId('raceLabel').textContent='DAILY RACE';moveRunner(played?played.total:0);rollClockDigits('home-raceClockDigits',played?played.total:0,'mini',false);showPanel('homePanel');}
 function readSaved(){try{const v=localStorage.getItem(dailyStorageKey());return v?JSON.parse(v):null;}catch{return null;}}
 function mobileGameDevice(){return window.matchMedia('(max-width:700px) and (pointer:coarse)').matches;}
 function startRun(){cancelAnimationFrame(ticker);setSuspense(false);resetSprint();questions=selectQuestions();questionIndex=0;total=0;answers=[];locked=false;byId('raceLabel').textContent='TODAY’S HEAT';moveRunner(0);descendTo('game');if(mobileGameDevice()){loadQuestion();return;}setTimeout(()=>{if(document.querySelector('.app').dataset.stage==='game')loadQuestion();},window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:850);}
