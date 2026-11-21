@@ -663,7 +663,7 @@
 .share-poster .poster-bottom .oval-tagline .track-oval{
   display:inline-flex!important;align-items:center;justify-content:center;
   flex:0 0 auto;white-space:nowrap;border:1.5px solid currentColor!important;
-  border-radius:999px!important;transform:rotate(-6deg);
+  border-radius:999px!important;transform:none;
   background:transparent;
 }
 .home-stage .hero .oval-tagline .track-oval{
@@ -672,7 +672,7 @@
 .home-stage .hero .oval-tagline .track-oval em,
 .share-poster .poster-bottom .oval-tagline .track-oval em{
   display:block;font-weight:950!important;font-style:italic!important;
-  color:#fff;transform:rotate(6deg);line-height:1.05;white-space:nowrap;
+  color:#fff;transform:none;line-height:1.05;white-space:nowrap;
 }
 .home-stage .hero .oval-tagline .track-oval em{
   font-size:1.07em!important;letter-spacing:-.045em;
@@ -11086,7 +11086,7 @@ function paintPoster(result){
   g.font='italic 900 29px Inter,Arial,sans-serif';
   const trackWidth=g.measureText('TRACK').width;
   g.fillStyle='#fff';g.fillText('TRACK',trackX,1320);
-  g.beginPath();g.ellipse(trackX+trackWidth/2,1309,trackWidth/2+17,23,-0.11,0,Math.PI*2);
+  g.beginPath();g.ellipse(trackX+trackWidth/2,1309,trackWidth/2+17,23,0,0,Math.PI*2);
   g.lineWidth=2.5;g.strokeStyle='#fff5df';g.stroke();g.restore();
   write('CAN YOU BEAT ME?  ↗',1006,1324,27,'1000','#fff','right');
   return c;
