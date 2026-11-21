@@ -10487,7 +10487,7 @@ function sprintBand(metres){
   const value=Math.max(0,Number(metres)||0);
   return SPRINT_BANDS.find(b=>value>=b.metres);
 }
-let runnerAt=0,runnerMotion=0;
+let runnerAt=0,runnerMotion=0,sprintStartTimer=0;
 function positionRunner(percent){
   const distance=Math.max(0,Math.min(100,Number(percent)||0));
   const line=byId('lane0'),trail=byId('progressPath');
@@ -10497,7 +10497,7 @@ function positionRunner(percent){
   byId('spriteFacing').removeAttribute('transform');
 }
 function resetSprint(){
-  cancelAnimationFrame(runnerMotion);runnerMotion=0;runnerAt=0;positionRunner(0);
+  clearTimeout(sprintStartTimer);sprintStartTimer=0;cancelAnimationFrame(runnerMotion);runnerMotion=0;runnerAt=0;positionRunner(0);
   byId('progressPath').setAttribute('stroke','#aab0b9');
   byId('raceCard').style.setProperty('--sprint-colour','#aab0b9');
   byId('sprintReadout').textContent='READY AT 0M';
@@ -10505,20 +10505,28 @@ function resetSprint(){
 }
 function animateSprint(metres){
   const band=sprintBand(metres),goal=Math.max(0,Math.min(100,Number(metres)||0));
-  cancelAnimationFrame(runnerMotion);runnerMotion=0;runnerAt=0;positionRunner(0);
+  clearTimeout(sprintStartTimer);sprintStartTimer=0;cancelAnimationFrame(runnerMotion);
+  runnerMotion=0;runnerAt=0;positionRunner(0);
   byId('progressPath').setAttribute('stroke',band.color);
   byId('raceCard').style.setProperty('--sprint-colour',band.color);
   const label=byId('sprintReadout');
   label.textContent=goal?band.label+' · '+goal+'M':'NO MARK · 0M';
   label.style.color=band.color;
   if(!goal||matchMedia('(prefers-reduced-motion: reduce)').matches){runnerAt=goal;positionRunner(goal);return;}
-  const start=performance.now(),duration=goal===100?1100:Math.round(570+goal*4.4);
-  function frame(now){
-    const t=Math.min(1,(now-start)/duration),eased=1-Math.pow(1-t,3);
-    runnerAt=goal*eased;positionRunner(runnerAt);
-    if(t<1)runnerMotion=requestAnimationFrame(frame);
-  }
-  runnerMotion=requestAnimationFrame(frame);
+  const duration=goal===100?1100:Math.round(570+goal*4.4);
+  const startMotion=()=>{
+    sprintStartTimer=0;
+    const start=performance.now();
+    function frame(now){
+      const t=Math.min(1,(now-start)/duration),eased=1-Math.pow(1-t,3);
+      runnerAt=goal*eased;positionRunner(runnerAt);
+      if(t<1)runnerMotion=requestAnimationFrame(frame);
+    }
+    runnerMotion=requestAnimationFrame(frame);
+  };
+  // Give the mobile keyboard time to lower so the runner's sprint is visible.
+  if(mobileGameDevice())sprintStartTimer=setTimeout(startMotion,240);
+  else startMotion();
 }
 // The dot-matrix clock tracks cumulative metres, independent of each sprint.
 function moveRunner(metres,animated=false){
