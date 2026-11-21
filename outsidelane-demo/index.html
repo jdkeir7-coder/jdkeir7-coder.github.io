@@ -584,6 +584,35 @@
   .app.answer-reveal .game-stage .race-card .straight-track{max-width:310px!important}
 }
 @media(prefers-reduced-motion:reduce){.sprint-track-foot strong{transition:none}}
+
+/* Clean track: visible sprint feedback lives in the answer panel, not below the lane. */
+.sprint-sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+/* Scoreboard is the sole visual headline on the result. */
+.share-poster .poster-stats{margin:3.5cqw 0 2.4cqw}
+.share-poster .poster-splits{flex:1;min-height:0}
+/* One unbroken line; only TRACK has weight, italics and a racetrack oval. */
+.share-poster .poster-bottom{display:flex;align-items:center;gap:2cqw}
+.share-poster .poster-tagline{display:inline-flex;align-items:center;gap:.8cqw;white-space:nowrap!important;font-weight:450!important;font-size:1.92cqw!important;letter-spacing:.09cqw;text-transform:uppercase;line-height:1.5;color:#ffe5d9}
+.share-poster .poster-tagline .track-oval{position:relative;display:inline-flex;align-items:center;justify-content:center;border:1px solid #fff2de;border-radius:50%;padding:.6cqw 1.4cqw;transform:rotate(-8deg);white-space:nowrap}
+.share-poster .poster-tagline .track-oval em{display:inline-block;font-weight:950!important;font-style:italic;font-size:2.45cqw;letter-spacing:.05cqw;line-height:1.1;color:#fff;transform:rotate(8deg)}
+.share-poster .poster-challenge{font-size:1.98cqw;white-space:nowrap;line-height:1.1}
+.share-poster .poster-challenge span{font-size:2.6cqw}
+/* Brief reveal curtain: a moment of suspense before the 15-column dot animation. */
+.share-poster .result-reveal-veil{
+  position:absolute;inset:0;z-index:25;pointer-events:none;visibility:hidden;opacity:0;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;gap:3cqw;
+  color:#fff;text-align:center;background:radial-gradient(ellipse at center,#ad5045 0%,#6b2629 60%,#32191b 100%);
+}
+.share-poster.result-intro .result-reveal-veil{visibility:visible;animation:scoreVeilIntro 1.65s ease-in-out both}
+.result-reveal-veil .veil-overline{color:#ffe0c8;font-weight:750;font-size:2.7cqw;letter-spacing:.6cqw}
+.result-reveal-veil strong{font-size:6.1cqw;font-weight:950;letter-spacing:-.1cqw;line-height:1.1}
+.result-reveal-veil .veil-pulses{display:flex;align-items:center;gap:1.2cqw}
+.result-reveal-veil .veil-pulses i{height:1.9cqw;width:1.9cqw;border-radius:2px;background:#fff7d0;animation:scoreVeilPulse .48s infinite alternate}
+.result-reveal-veil .veil-pulses i:nth-child(2){animation-delay:.16s}
+.result-reveal-veil .veil-pulses i:nth-child(3){animation-delay:.32s}
+@keyframes scoreVeilIntro{0%,49%{opacity:1;visibility:visible}78%{opacity:.55;visibility:visible}99%{opacity:0;visibility:visible}100%{opacity:0;visibility:hidden}}
+@keyframes scoreVeilPulse{from{opacity:.18;transform:rotateX(60deg)}to{opacity:1;transform:rotateX(0)}}
+@media(prefers-reduced-motion:reduce){.share-poster.result-intro .result-reveal-veil{animation:none!important;visibility:hidden!important;opacity:0!important}.result-reveal-veil .veil-pulses i{animation:none!important}}
 </style>
 </head>
 <body>
@@ -630,7 +659,7 @@
         </g>
       </g>
     </svg>
-    <div class="track-foot sprint-track-foot"><span>100M SPRINT · EACH ANSWER</span><strong id="sprintReadout" aria-live="polite">READY AT 0M</strong></div>
+    <span id="sprintReadout" class="sprint-sr-only" role="status" aria-live="polite"></span>
   </section>
   <section id="welcomeStats" class="stats"><div class="stat"><b>8</b><span>questions</span></div><div class="stat"><b>25s</b><span>per answer</span></div><div class="stat"><b>800m</b><span>maximum score</span></div></section>
   <main>
@@ -643,7 +672,7 @@
     <section id="gamePanel" class="panel hide" aria-live="off">
       <div class="question-top"><span class="count-label" id="countLabel">ROUND 1 OF 8</span><span id="mobileScoreChip" class="mobile-score-chip" aria-label="Current score">0m</span><span class="timer" id="timer">25.0s</span></div><div class="timer-bar"><div id="timerFill"></div></div>
       <div class="label" id="topicLabel">OLYMPIC HISTORY</div><h2 id="questionText" class="question"></h2><p id="questionDesc" class="description">Type one valid answer. Obscure answers go further.</p><a id="sourceLink" target="_blank" rel="noopener noreferrer" class="source-link" href="#">VIEW OFFICIAL SOURCE ↗</a>
-      <form class="entry" id="answerForm" autocomplete="off"><input id="answerInput" class="answer" type="text" maxlength="80" placeholder="Enter a name or place…" autocapitalize="words" inputmode="text" enterkeyhint="go" autocorrect="off" spellcheck="false" autocomplete="off" aria-label="Your answer" /><button type="submit" id="submitAnswer" class="button">SUBMIT →</button></form>
+      <form class="entry" id="answerForm" autocomplete="off"><input id="answerInput" class="answer" type="text" maxlength="80" placeholder="Enter a name or place…" autocapitalize="words" inputmode="text" enterkeyhint="next" autocorrect="off" spellcheck="false" autocomplete="off" aria-label="Your answer" /><button type="submit" id="submitAnswer" class="button">SUBMIT →</button></form>
       <div id="answerSuggestions" class="suggestions hide" aria-live="polite" aria-label="Spelling suggestions"></div><div id="validationMessage" class="message" aria-live="polite"></div><div id="feedback" class="feedback hide" aria-live="polite"><div id="feedbackBig" class="big"></div><div id="feedbackMsg" class="msg"></div></div><button id="nextButton" class="button next hide">NEXT QUESTION →</button>
       <div class="dots" id="questionDots" aria-label="Question progress"></div>
     </section>
@@ -659,7 +688,7 @@
         <button id="shareScoreImage" class="result-icon-button" type="button" aria-label="Share result image" title="Share result image"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 16V3m0 0L7 8m5-5 5 5M5 14v6h14v-6"/></svg></button>
         <button id="shareResult" class="result-icon-button" type="button" aria-label="Copy result to clipboard" title="Copy result"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg></button>
       </div>
-      <div id="sharePoster" class="share-poster" role="group" aria-label="Your OUTSIDELANE 800 metre result. Select any split to inspect example answers.">
+      <div id="sharePoster" class="share-poster" role="group" aria-label="Your OUTSIDELANE 800 metre result. Select any split to inspect example answers."><div class="result-reveal-veil" aria-hidden="true"><span class="veil-overline">RACE COMPLETE</span><strong>THE RESULT IS IN</strong><span class="veil-pulses"><i></i><i></i><i></i></span></div>
         
         <div class="poster-edition"><span id="posterDay">20 NOV 2026</span><span id="posterMode">DAILY HEAT · 800M</span></div>
         <div class="matrix-frame" aria-label="Trackside-style finish scoreboard">
@@ -671,11 +700,11 @@
           </div>
           <div class="matrix-footer"><span>HEAT COMPLETE</span></div>
         </div>
-        <div class="poster-title" id="posterTitle">OUTSIDE<br>THE PACK.</div>
+        
         <div class="poster-stats"><span><b id="posterCorrect">0/8</b> VALID ANSWERS</span><span><b id="posterRare">0</b> RARE SPLITS</span></div>
         <div class="poster-splits-heading"><span>YOUR EIGHT SPLITS</span><span>METRES</span></div>
         <div class="poster-splits" id="posterSplits"></div>
-        <div class="poster-bottom"><span class="poster-tagline">THINK OUTSIDE THE <em>TRACK.</em></span><span class="poster-challenge">CAN YOU BEAT ME? <span>↗</span></span></div>
+        <div class="poster-bottom"><span class="poster-tagline">THINK OUTSIDE THE <span class="track-oval"><em>TRACK</em></span></span><span class="poster-challenge">CAN YOU BEAT ME? <span>↗</span></span></div>
       </div>
 
 
@@ -10365,6 +10394,7 @@ const byId = id => document.getElementById(id);
 
 const panels = ['homePanel','gamePanel','resultsPanel'];
 let questions=[], questionIndex=0, total=0, answers=[], remaining=25, deadline=0, ticker=0, locked=false;
+let returnKeyWantsNext=false,returnNextTimer=0;
 let surgeTimer=0;
 function normal(s){return (s||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/&/g,' and ').replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();}
 function dayIndex(){return Math.floor(Date.parse(new Date().toISOString().slice(0,10)+'T00:00:00Z')/86400000);}
@@ -10500,7 +10530,7 @@ function resetSprint(){
   clearTimeout(sprintStartTimer);sprintStartTimer=0;cancelAnimationFrame(runnerMotion);runnerMotion=0;runnerAt=0;positionRunner(0);
   byId('progressPath').setAttribute('stroke','#aab0b9');
   byId('raceCard').style.setProperty('--sprint-colour','#aab0b9');
-  byId('sprintReadout').textContent='READY AT 0M';
+  byId('sprintReadout').textContent='';
   byId('sprintReadout').style.color='#ffe0d4';
 }
 function animateSprint(metres){
@@ -10540,11 +10570,11 @@ setInterval(()=>{if(document.hidden)return;const sprite=byId('pixelRunner');if(!
 
 function setSuspense(active){byId('raceCard').classList.toggle('critical',active);byId('timer').classList.toggle('pulse',active);byId('raceCard').querySelector('.track').classList.toggle('suspense',active);}
 function triggerSurge(points){const badge=byId('surgeBadge');const race=byId('raceCard');const feedback=byId('feedback');clearTimeout(surgeTimer);badge.textContent=points>=100?'VERY RARE!':points>=85?'DEEP CUT!':points>=60?'RARE PICK!':points>=30?'SOLID PICK!':'ON THE BOARD!';badge.classList.remove('show');race.classList.remove('surge');feedback.classList.remove('surge-good');void badge.offsetWidth;void race.offsetWidth;badge.classList.add('show');race.classList.add('surge');feedback.classList.add('surge-good');surgeTimer=setTimeout(()=>{race.classList.remove('surge');feedback.classList.remove('surge-good');},900);}
-function showWelcome(){cancelAnimationFrame(ticker);setSuspense(false);resetSprint();document.querySelector('.app').classList.remove('answer-reveal','keyboard-open','keyboard-tight');const played=readSaved();byId('dateLabel').textContent='DAILY HEAT · '+new Date(utcDate()+'T12:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short',timeZone:'UTC'}).toUpperCase();byId('homePanel').querySelector('h2').textContent=played?'Your daily race is complete.':'How far can you go?';byId('homePanel').querySelector('p').textContent=played?'Your result is saved on this device. A new heat arrives tomorrow.':'Broad prompts with dozens or hundreds of correct athletes. The rarer your answer, the further you run.';byId('startDaily').querySelector('.home-start-label').textContent=played?'VIEW TODAY’S RESULT':"RUN TODAY'S HEAT";byId('raceLabel').textContent='DAILY RACE';moveRunner(played?played.total:0);byId('home-raceClockDigits').innerHTML=byId('raceClockDigits').innerHTML;showPanel('homePanel');}
+function showWelcome(){clearTimeout(returnNextTimer);returnNextTimer=0;returnKeyWantsNext=false;byId('sharePoster').classList.remove('result-intro');cancelAnimationFrame(ticker);setSuspense(false);resetSprint();document.querySelector('.app').classList.remove('answer-reveal','keyboard-open','keyboard-tight');const played=readSaved();byId('dateLabel').textContent='DAILY HEAT · '+new Date(utcDate()+'T12:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short',timeZone:'UTC'}).toUpperCase();byId('homePanel').querySelector('h2').textContent=played?'Your daily race is complete.':'How far can you go?';byId('homePanel').querySelector('p').textContent=played?'Your result is saved on this device. A new heat arrives tomorrow.':'Broad prompts with dozens or hundreds of correct athletes. The rarer your answer, the further you run.';byId('startDaily').querySelector('.home-start-label').textContent=played?'VIEW TODAY’S RESULT':"RUN TODAY'S HEAT";byId('raceLabel').textContent='DAILY RACE';moveRunner(played?played.total:0);byId('home-raceClockDigits').innerHTML=byId('raceClockDigits').innerHTML;showPanel('homePanel');}
 function readSaved(){try{const v=localStorage.getItem(dailyStorageKey());return v?JSON.parse(v):null;}catch{return null;}}
 function mobileGameDevice(){return window.matchMedia('(max-width:700px) and (pointer:coarse)').matches;}
 function startRun(){cancelAnimationFrame(ticker);setSuspense(false);resetSprint();questions=selectQuestions();questionIndex=0;total=0;answers=[];locked=false;byId('raceLabel').textContent='TODAY’S HEAT';moveRunner(0);descendTo('game');if(mobileGameDevice()){loadQuestion();return;}setTimeout(()=>{if(document.querySelector('.app').dataset.stage==='game')loadQuestion();},window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:850);}
-function loadQuestion(){cancelAnimationFrame(ticker);setSuspense(false);resetSprint();byId('surgeBadge').classList.remove('show');locked=false;remaining=25;byId('countLabel').textContent='ROUND '+(questionIndex+1)+' OF 8';byId('topicLabel').textContent=questions[questionIndex].topic;byId('questionText').textContent=questions[questionIndex].prompt;byId('questionDesc').textContent=questions[questionIndex].note;const source=questions[questionIndex].source;byId('sourceLink').href=officialSeed.sources[source];byId('sourceLink').textContent=({world:'WORLD ATHLETICS ENTRIES ↗',europe:'EUROPEAN ATHLETICS ENTRIES ↗',usatf:'USATF OFFICIAL RESULTS ↗'})[source] || ({toplists:'WORLD ATHLETICS TOP LIST ↗',world_outdoor:'WORLD ATHLETICS RESULTS ↗',euro_outdoor:'EUROPEAN OUTDOOR RESULTS ↗',usatf_outdoor:'USATF OUTDOOR RESULTS ↗',diamond_league:'DIAMOND LEAGUE SOURCE ↗',british_champs:'BRITISH ATHLETICS SOURCE ↗',marathon_majors:'MARATHON RESULTS & HISTORY ↗'})[questions[questionIndex].bucket] || 'OFFICIAL SOURCE ↗';byId('answerInput').value='';byId('answerInput').disabled=false;byId('submitAnswer').disabled=false;byId('answerForm').classList.remove('hide');byId('nextButton').classList.add('hide');byId('feedback').classList.add('hide');byId('validationMessage').textContent='';byId('answerSuggestions').replaceChildren();byId('answerSuggestions').classList.add('hide');drawDots();deadline=Date.now()+25000;document.querySelector('.app').classList.remove('answer-reveal');updateClock();
+function loadQuestion(){clearTimeout(returnNextTimer);returnNextTimer=0;returnKeyWantsNext=false;cancelAnimationFrame(ticker);setSuspense(false);resetSprint();byId('surgeBadge').classList.remove('show');locked=false;remaining=25;byId('countLabel').textContent='ROUND '+(questionIndex+1)+' OF 8';byId('topicLabel').textContent=questions[questionIndex].topic;byId('questionText').textContent=questions[questionIndex].prompt;byId('questionDesc').textContent=questions[questionIndex].note;const source=questions[questionIndex].source;byId('sourceLink').href=officialSeed.sources[source];byId('sourceLink').textContent=({world:'WORLD ATHLETICS ENTRIES ↗',europe:'EUROPEAN ATHLETICS ENTRIES ↗',usatf:'USATF OFFICIAL RESULTS ↗'})[source] || ({toplists:'WORLD ATHLETICS TOP LIST ↗',world_outdoor:'WORLD ATHLETICS RESULTS ↗',euro_outdoor:'EUROPEAN OUTDOOR RESULTS ↗',usatf_outdoor:'USATF OUTDOOR RESULTS ↗',diamond_league:'DIAMOND LEAGUE SOURCE ↗',british_champs:'BRITISH ATHLETICS SOURCE ↗',marathon_majors:'MARATHON RESULTS & HISTORY ↗'})[questions[questionIndex].bucket] || 'OFFICIAL SOURCE ↗';byId('answerInput').value='';byId('answerInput').disabled=false;byId('submitAnswer').disabled=false;byId('answerForm').classList.remove('hide');byId('nextButton').classList.add('hide');byId('feedback').classList.add('hide');byId('validationMessage').textContent='';byId('answerSuggestions').replaceChildren();byId('answerSuggestions').classList.add('hide');drawDots();deadline=Date.now()+25000;document.querySelector('.app').classList.remove('answer-reveal');updateClock();
   // Keyboard opening on iOS requires a real tap: this function is called directly
   // from RUN TODAY'S HEAT / NEXT QUESTION for mobile.
   if(window.matchMedia('(min-width: 700px)').matches||mobileGameDevice())byId('answerInput').focus({preventScroll:true});}
@@ -10636,7 +10666,7 @@ function submit(event){
   event.preventDefault();if(locked)return;
   if(Date.now()>=deadline){finalize(null);return;}
   const value=byId('answerInput').value.trim();
-  if(!value){byId('validationMessage').textContent='Type an answer before submitting.';return;}
+  if(!value){returnKeyWantsNext=false;byId('validationMessage').textContent='Type an answer before submitting.';return;}
   const found=lookup(questions[questionIndex],value);
   if(found){finalize(found);return;}
   const matches=possibleNames(questions[questionIndex],value);
@@ -10646,6 +10676,7 @@ function submit(event){
   if(typos.length===1 && (matches.length===1 || matches[1].best-typos[0].best>.12)){
     finalize(typos[0].entry);return;
   }
+  returnKeyWantsNext=false;
   renderSuggestions(value);
   byId('validationMessage').textContent=matches.length
     ?'Choose the corrected name above, or keep typing. Your timer is still running.'
@@ -10653,13 +10684,13 @@ function submit(event){
   byId('answerInput').focus();
 }
 function category(points){return sprintBand(points).label;}
-function finalize(entry){if(locked)return;locked=true;setSuspense(false);cancelAnimationFrame(ticker);byId('answerInput').blur();const app=document.querySelector('.app');app.classList.remove('keyboard-open','keyboard-tight');app.classList.add('answer-reveal');byId('answerInput').disabled=true;byId('submitAnswer').disabled=true;byId('answerForm').classList.add('hide');byId('answerSuggestions').classList.add('hide');byId('nextButton').classList.remove('hide');const points=entry?earnedSprintMetres(entry[1]):0;total+=points;answers.push({topic:questions[questionIndex].topic,prompt:questions[questionIndex].prompt,name:entry?entry[0]:'No accepted answer',points});moveRunner(total,!!entry);animateSprint(points);byId('feedback').classList.remove('hide','missed','surge-good');if(entry){triggerSurge(points);byId('feedbackBig').textContent=`+${points} METRES · ${category(points)}`;byId('feedbackMsg').textContent=entry[0]+' — on the board.';}else{byId('feedback').classList.add('missed');byId('feedbackBig').textContent='+0 METRES · TIME UP';byId('feedbackMsg').textContent='No accepted answer this round. Reset and go again on the next one.';}byId('nextButton').textContent=questionIndex===7?'SEE MY RESULT →':'NEXT QUESTION →';byId('announce').textContent=`${points} metres. ${category(points)}.`;}
-function nextQuestion(){if(!locked)return;questionIndex++;if(questionIndex>=questions.length){finishRun();return;}loadQuestion();}
+function finalize(entry){if(locked)return;locked=true;const advanceFromReturn=mobileGameDevice()&&returnKeyWantsNext;returnKeyWantsNext=false;setSuspense(false);cancelAnimationFrame(ticker);byId('answerInput').blur();const app=document.querySelector('.app');app.classList.remove('keyboard-open','keyboard-tight');app.classList.add('answer-reveal');byId('answerInput').disabled=true;byId('submitAnswer').disabled=true;byId('answerForm').classList.add('hide');byId('answerSuggestions').classList.add('hide');byId('nextButton').classList.remove('hide');const points=entry?earnedSprintMetres(entry[1]):0;total+=points;answers.push({topic:questions[questionIndex].topic,prompt:questions[questionIndex].prompt,name:entry?entry[0]:'No accepted answer',points});moveRunner(total,!!entry);animateSprint(points);byId('feedback').classList.remove('hide','missed','surge-good');if(entry){triggerSurge(points);byId('feedbackBig').textContent=`+${points} METRES · ${category(points)}`;byId('feedbackMsg').textContent=entry[0]+' — on the board.';}else{byId('feedback').classList.add('missed');byId('feedbackBig').textContent='+0 METRES · TIME UP';byId('feedbackMsg').textContent='No accepted answer this round. Reset and go again on the next one.';}byId('nextButton').textContent=questionIndex===7?'SEE MY RESULT →':'NEXT QUESTION →';byId('announce').textContent=`${points} metres. ${category(points)}.`;
+if(advanceFromReturn){returnNextTimer=setTimeout(()=>{if(locked&&document.querySelector('.app').dataset.stage==='game')nextQuestion();},2500);}}
+function nextQuestion(){if(!locked)return;clearTimeout(returnNextTimer);returnNextTimer=0;returnKeyWantsNext=false;questionIndex++;if(questionIndex>=questions.length){finishRun();return;}loadQuestion();}
 function finishRun(){cancelAnimationFrame(ticker);const correct=answers.filter(a=>a.points>0).length;const result={date:utcDate(),total,answers,correct};try{localStorage.setItem(dailyStorageKey(),JSON.stringify(result));}catch{}showResults(result);}
-function showResults(result){setSuspense(false);document.querySelector('.app').classList.remove('answer-reveal','keyboard-open','keyboard-tight');moveRunner(result.total);renderSharePoster(result);byId('resultsTitle').textContent=result.total>=550?'ELITE KNOWLEDGE.':result.total>=350?'GREAT RACE.':result.total>=170?'NICE RUN.':'THE FINISH LINE.';byId('resultsSubtitle').textContent=(result.date||utcDate())+' · '+'Daily heat'+' · 8 rounds';byId('finalScore').textContent=result.total;byId('finalHits').textContent=result.correct+' / 8';byId('answerReview').innerHTML='';(result.answers||[]).forEach((a,i)=>{const item=document.createElement('div');item.className='review-item';const n=document.createElement('div');n.className='review-index';n.textContent=String(i+1).padStart(2,'0');const answer=document.createElement('div');answer.className='review-name';const title=document.createElement('div');title.textContent=a.name;const sub=document.createElement('div');sub.className='review-topic';sub.textContent=a.topic;answer.append(title,sub);const pts=document.createElement('div');pts.className='review-score';pts.textContent='+'+a.points;item.append(n,answer,pts);byId('answerReview').appendChild(item);});descendTo('results');}
+function showResults(result){setSuspense(false);clearTimeout(returnNextTimer);returnNextTimer=0;document.querySelector('.app').classList.remove('answer-reveal','keyboard-open','keyboard-tight');const poster=byId('sharePoster');poster.classList.remove('result-intro');void poster.offsetWidth;poster.classList.add('result-intro');moveRunner(result.total);renderSharePoster(result);byId('resultsTitle').textContent=result.total>=550?'ELITE KNOWLEDGE.':result.total>=350?'GREAT RACE.':result.total>=170?'NICE RUN.':'THE FINISH LINE.';byId('resultsSubtitle').textContent=(result.date||utcDate())+' · '+'Daily heat'+' · 8 rounds';byId('finalScore').textContent=result.total;byId('finalHits').textContent=result.correct+' / 8';byId('answerReview').innerHTML='';(result.answers||[]).forEach((a,i)=>{const item=document.createElement('div');item.className='review-item';const n=document.createElement('div');n.className='review-index';n.textContent=String(i+1).padStart(2,'0');const answer=document.createElement('div');answer.className='review-name';const title=document.createElement('div');title.textContent=a.name;const sub=document.createElement('div');sub.className='review-topic';sub.textContent=a.topic;answer.append(title,sub);const pts=document.createElement('div');pts.className='review-score';pts.textContent='+'+a.points;item.append(n,answer,pts);byId('answerReview').appendChild(item);});descendTo('results');}
 
 // Share card: a spoiler-free visual that fits a single mobile screenshot.
-function scoreHeadline(metres){return metres>=640?'LEGENDARY<br>LANE.':metres>=470?'OUTSIDE<br>THE PACK.':metres>=270?'FIND YOUR<br>LANE.':'KEEP<br>CHASING.';}
 function splitTier(points){const band=sprintBand(points);return {label:band.label,color:band.color};}
 function readableDate(iso){const d=new Date((iso||utcDate())+'T12:00:00Z');return d.toLocaleDateString('en-GB',{timeZone:'UTC',day:'2-digit',month:'short',year:'numeric'}).toUpperCase();}
 // 5x7 square-LED glyphs shared by the live board and the exported PNG.
@@ -10820,8 +10851,7 @@ function paintMatrixCanvas(ctx,value,x,y,pixel,gap,digitSpace){
 function renderSharePoster(result){
   byId('posterDay').textContent=readableDate(result.date);byId('posterMode').textContent='DAILY HEAT'+' · 800M';
   byId('resultsDayLabel').textContent='DAILY'+' · '+readableDate(result.date);
-  byId('posterTitle').innerHTML=scoreHeadline(result.total);
-  renderMatrixScore(result.total,true);
+  renderMatrixScore(result.total,true,1500);
   const rounds=(result.answers||[]).slice(0,8);
   const hits=rounds.filter(x=>x.points>0).length,rare=rounds.filter(x=>x.points>=70).length;
   byId('posterCorrect').textContent=hits+'/8';byId('posterRare').textContent=rare;
@@ -10927,15 +10957,13 @@ function paintPoster(result){
   paintMatrixCanvas(g,result.total,540-total/2,322,px,gap,space);
   write('METRES SCORED',129,522,21,'900','#c6c99d','left','monospace');
   write('HEAT COMPLETE',111,595,27,'1000','#3a2b08');
-  // Race summary sits below the clock, keeping the clock the focus of the card.
-  const h=scoreHeadline(result.total).replace('<br>',' ').replace(/\s+/g,' ').trim();
-  write(h,69,724,66,'1000','#fff');
+  // Clean result card: the clock is the headline. Split summary begins directly beneath it.
   const splits=(result.answers||[]).slice(0,8),hits=splits.filter(a=>a.points>0).length,rare=splits.filter(a=>a.points>=70).length;
-  rect(68,755,456,70,13,'#ffffff1d','#ffffff42',2);rect(542,755,467,70,13,'#ffffff1d','#ffffff42',2);
-  write(hits+'/8',90,804,40,'1000','#fff');write('VALID ANSWERS',200,800,21,'900','#ffe2d7');
-  write(String(rare),564,804,40,'1000','#fff');write('RARE SPLITS',638,800,21,'900','#ffe2d7');
-  write('YOUR EIGHT SPLITS',71,873,26,'1000','#fff0e6');write('METRES',1007,873,23,'1000','#fff0e6','right');line(69,887,1010,887,'#ffffff99');
-  const rowTop=905,rowH=44;
+  rect(68,648,456,70,13,'#ffffff1d','#ffffff42',2);rect(542,648,467,70,13,'#ffffff1d','#ffffff42',2);
+  write(hits+'/8',90,696,40,'1000','#fff');write('VALID ANSWERS',200,694,21,'900','#ffe2d7');
+  write(String(rare),564,696,40,'1000','#fff');write('RARE SPLITS',638,694,21,'900','#ffe2d7');
+  write('YOUR EIGHT SPLITS',71,778,26,'1000','#fff0e6');write('METRES',1007,778,23,'1000','#fff0e6','right');line(69,789,1010,789,'#ffffff99');
+  const rowTop=801,rowH=54;
   for(let i=0;i<8;i++){
     const points=splits[i]?.points||0,t=splitTier(points),y=rowTop+i*rowH;
     write(String(i+1).padStart(2,'0'),73,y+25,22,'900','#f1ccbf');
@@ -10946,10 +10974,15 @@ function paintPoster(result){
   }
   line(70,1282,1010,1282,'#ffffff8a',2);
   const tagline='THINK OUTSIDE THE ';
-  g.font='850 26px system-ui,-apple-system,sans-serif';
+  g.save();g.font='500 25px Inter,Arial,sans-serif';
   const leadWidth=g.measureText(tagline).width;
-  write(tagline,72,1321,26,'850','#ffe7db');
-  g.save();g.font='italic 900 29px system-ui,-apple-system,sans-serif';g.fillStyle='#fff';g.textAlign='left';g.textBaseline='alphabetic';g.fillText('TRACK.',72+leadWidth,1321);g.restore();
+  g.fillStyle='#ffe7db';g.textAlign='left';g.textBaseline='alphabetic';g.fillText(tagline,72,1320);
+  const trackX=72+leadWidth+9;
+  g.font='italic 900 29px Inter,Arial,sans-serif';
+  const trackWidth=g.measureText('TRACK').width;
+  g.fillStyle='#fff';g.fillText('TRACK',trackX,1320);
+  g.beginPath();g.ellipse(trackX+trackWidth/2,1309,trackWidth/2+17,23,-0.11,0,Math.PI*2);
+  g.lineWidth=2.5;g.strokeStyle='#fff5df';g.stroke();g.restore();
   write('CAN YOU BEAT ME?  ↗',1006,1324,27,'1000','#fff','right');
   return c;
 }
@@ -10971,7 +11004,10 @@ byId('brandHome').addEventListener('click',()=>{
 byId('posterScore').addEventListener('click',()=>renderMatrixScore(activeResult().total,true,25));
 byId('saveScoreImage').addEventListener('click',saveImage);
 byId('shareScoreImage').addEventListener('click',shareImage);
-byId('startDaily').addEventListener('click',()=>{const saved=readSaved();if(saved)showResults(saved);else startRun();});byId('answerForm').addEventListener('submit',submit);byId('answerInput').addEventListener('input',event=>{if(locked)return;byId('validationMessage').textContent='';renderSuggestions(event.target.value);});byId('nextButton').addEventListener('click',nextQuestion);byId('shareResult').addEventListener('click',share);document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!locked&&questions.length)updateClock();});buildStages();setupMobileKeyboard();showWelcome();
+byId('startDaily').addEventListener('click',()=>{const saved=readSaved();if(saved)showResults(saved);else startRun();});byId('answerForm').addEventListener('submit',submit);
+byId('answerInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing)returnKeyWantsNext=mobileGameDevice();});
+byId('submitAnswer').addEventListener('pointerdown',()=>{returnKeyWantsNext=false;});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.repeat&&locked&&document.querySelector('.app').dataset.stage==='game'&&document.activeElement===document.body){e.preventDefault();nextQuestion();}});byId('answerInput').addEventListener('input',event=>{if(locked)return;byId('validationMessage').textContent='';renderSuggestions(event.target.value);});byId('nextButton').addEventListener('click',nextQuestion);byId('shareResult').addEventListener('click',share);document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!locked&&questions.length)updateClock();});buildStages();setupMobileKeyboard();showWelcome();
 </script>
 </body>
 </html>
