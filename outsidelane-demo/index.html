@@ -884,6 +884,97 @@
   .race-top .race-clock-digits{--mini-dot:2.45px;--mini-gap:.9px;gap:2px!important}
   .race-top .race-label-group{max-width:calc(100% - 180px)}
 }
+
+/* HOME REVISION: two generous panels with balanced spacing and no hidden track. */
+.home-stage{
+  display:flex!important;flex-direction:column!important;align-items:stretch!important;
+  justify-content:flex-start!important;gap:clamp(14px,2.1vh,24px)!important;
+  padding:10px clamp(7px,1.3vw,16px) 28px!important;
+  overflow-x:hidden!important;overflow-y:auto!important;
+}
+.home-stage .hero{width:100%!important;max-width:980px!important;margin:0 auto!important;flex:0 0 auto!important}
+.home-stage .hero .oval-tagline{
+  display:flex!important;flex-flow:row nowrap!important;align-items:center!important;justify-content:center!important;
+  gap:.2em!important;width:100%!important;max-width:100%!important;
+  white-space:nowrap!important;margin:10px auto!important;
+  font-size:clamp(18px,3.7vw,55px)!important;font-weight:350!important;letter-spacing:-.05em!important;
+  line-height:1.1!important;
+}
+.home-stage .hero .oval-tagline .tagline-lead{font-weight:350!important;min-width:0}
+.home-stage .hero .oval-tagline .track-oval{
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  border:1.6px solid #fff!important;border-radius:999px!important;
+  padding:.12em .34em .16em!important;transform:none!important;white-space:nowrap!important;
+}
+.home-stage .hero .oval-tagline .track-oval em{
+  font-style:italic!important;font-weight:950!important;font-size:1.06em!important;
+  line-height:1!important;transform:none!important;color:#fff!important;
+}
+.home-stage .hero .sub{max-width:760px!important;margin:0 auto!important;font-size:clamp(12px,1.2vw,16px)!important;line-height:1.45!important}
+.home-stage #welcomeStats{display:none!important}
+.home-stage .race-card{
+  display:flex!important;flex-direction:column!important;justify-content:space-between!important;
+  width:100%!important;max-width:1040px!important;min-height:clamp(305px,38vh,440px)!important;
+  height:auto!important;margin:0 auto!important;flex:0 0 auto!important;
+  border-radius:22px!important;overflow:visible!important;
+  padding:16px 18px 13px!important;
+}
+.home-stage .race-top{min-height:82px!important;align-items:flex-start!important;flex:0 0 auto!important}
+.home-stage .race-card .straight-track{
+  display:block!important;width:min(100%,560px)!important;max-width:560px!important;
+  height:auto!important;flex:0 0 auto!important;
+  margin:10px auto 4px!important;overflow:visible!important;
+}
+.home-stage > main{
+  display:block!important;position:static!important;
+  width:100%!important;max-width:1040px!important;margin:0 auto!important;
+  flex:0 0 auto!important;
+}
+.home-stage #homePanel{
+  width:100%!important;min-height:clamp(200px,24vh,270px)!important;
+  display:flex!important;flex-direction:column!important;justify-content:space-between!important;
+  padding:20px 22px 18px!important;border-radius:22px!important;
+}
+.home-stage #homePanel h2{font-size:clamp(21px,2vw,30px)!important;margin:6px 0 8px!important}
+.home-stage #homePanel p{font-size:clamp(12px,1.1vw,16px)!important;line-height:1.5!important}
+.home-stage #homePanel .actions{margin-top:14px!important}
+.home-stage #homePanel #startDaily{min-height:58px!important;font-size:14px!important}
+@media(max-width:900px){
+  .home-stage .race-card{min-height:305px!important;padding:14px!important}
+  .home-stage .race-card .straight-track{width:min(100%,500px)!important}
+  .home-stage #homePanel{min-height:190px!important;padding:17px!important}
+  .home-stage .hero .oval-tagline{font-size:clamp(18px,4vw,36px)!important}
+}
+@media(max-width:620px){
+  .home-stage{gap:15px!important;padding:8px 5px 24px!important}
+  .home-stage .hero .oval-tagline{font-size:clamp(13px,4.2vw,25px)!important;gap:.13em!important}
+  .home-stage .hero .oval-tagline .track-oval{padding:.1em .24em .13em!important}
+  .home-stage .race-card{min-height:260px!important;padding:12px 10px!important}
+  .home-stage .race-card .straight-track{width:min(100%,430px)!important;margin:12px auto 5px!important}
+  .home-stage #homePanel{min-height:175px!important;padding:14px!important}
+  .home-stage #homePanel #startDaily{min-height:52px!important}
+}
+/* Articulated stride: knees bend independently of hip drive. */
+.athlete-figure{transform-box:view-box;transform-origin:center;animation:runner-bob .56s ease-in-out infinite;}
+.leg-front-thigh,.leg-back-thigh,.leg-front-shin,.leg-back-shin,
+.athlete-arm-front,.athlete-arm-back{transform-box:view-box;}
+.leg-front-thigh{transform-origin:-1px -1px;animation:stride-front .56s ease-in-out infinite;}
+.leg-back-thigh{transform-origin:-2px 0px;animation:stride-back .56s ease-in-out infinite;}
+.leg-front-shin{transform-origin:12px 8px;animation:knee-front .56s ease-in-out infinite;}
+.leg-back-shin{transform-origin:-12px 11px;animation:knee-back .56s ease-in-out infinite;}
+.athlete-arm-front{transform-origin:4px -20px;animation:arm-drive-front .56s ease-in-out infinite;}
+.athlete-arm-back{transform-origin:-3px -19px;animation:arm-drive-back .56s ease-in-out infinite;}
+@keyframes runner-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-1.5px)}}
+@keyframes stride-front{0%,100%{transform:rotate(-16deg)}50%{transform:rotate(18deg)}}
+@keyframes stride-back{0%,100%{transform:rotate(18deg)}50%{transform:rotate(-16deg)}}
+@keyframes knee-front{0%,100%{transform:rotate(16deg)}30%{transform:rotate(22deg)}65%{transform:rotate(-14deg)}}
+@keyframes knee-back{0%,100%{transform:rotate(-14deg)}30%{transform:rotate(4deg)}65%{transform:rotate(25deg)}}
+@keyframes arm-drive-front{0%,100%{transform:rotate(12deg)}50%{transform:rotate(-14deg)}}
+@keyframes arm-drive-back{0%,100%{transform:rotate(-14deg)}50%{transform:rotate(12deg)}}
+@media(prefers-reduced-motion:reduce){
+  .athlete-figure,.leg-front-thigh,.leg-back-thigh,.leg-front-shin,.leg-back-shin,
+  .athlete-arm-front,.athlete-arm-back{animation:none!important}
+}
 </style>
 </head>
 <body>
@@ -925,28 +1016,38 @@
         <ellipse class="shadow" cx="0" cy="19" rx="13" ry="4.6"/>
         <g id="spriteFacing">
           <g id="pixelRunner" class="athlete-figure" aria-hidden="true">
-            <!-- Simplified athletics runner: clean silhouette, distinct limbs and a forward lean. -->
-            <g class="athlete-leg athlete-leg-back">
-              <path d="M-2 0L-12 11L-21 13" fill="none" stroke="#24202a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M-2 0L-12 11L-21 13" fill="none" stroke="#f3b98c" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M-21 13L-27 14" fill="none" stroke="#f1f4f0" stroke-width="5" stroke-linecap="round"/>
-            </g>
+            <!-- Articulated running stride: thigh swings at hip, shin flexes from knee. -->
             <g class="athlete-arm athlete-arm-back">
               <path d="M-3 -19L-13 -11L-17 -19" fill="none" stroke="#28202a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
               <path d="M-3 -19L-13 -11L-17 -19" fill="none" stroke="#c98662" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
             </g>
-            <g class="athlete-leg athlete-leg-front">
-              <path d="M-1 -1L12 8L21 20" fill="none" stroke="#211d29" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M-1 -1L12 8L21 20" fill="none" stroke="#f6bb8b" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M20 20L29 20" fill="none" stroke="#f8fbf5" stroke-width="5.5" stroke-linecap="round"/>
-              <path d="M22 22L30 22" fill="none" stroke="#72e5d4" stroke-width="2.5" stroke-linecap="round"/>
+            <g class="leg-back-thigh">
+              <path d="M-2 0L-12 11" fill="none" stroke="#24202a" stroke-width="8" stroke-linecap="round"/>
+              <path d="M-2 0L-12 11" fill="none" stroke="#f3b98c" stroke-width="5" stroke-linecap="round"/>
+              <g class="leg-back-shin">
+                <path d="M-12 11L-21 13" fill="none" stroke="#24202a" stroke-width="8" stroke-linecap="round"/>
+                <path d="M-12 11L-21 13" fill="none" stroke="#f3b98c" stroke-width="5" stroke-linecap="round"/>
+                <path d="M-21 13L-27 14" fill="none" stroke="#f1f4f0" stroke-width="5" stroke-linecap="round"/>
+              </g>
             </g>
-            <path d="M-10 -20L5 -23L9 -7L-5 -4Z" fill="#f5f1e9" stroke="#25212d" stroke-width="2.5" stroke-linejoin="round"/>
-            <path d="M-5 -20L5 -21L8 -12L-3 -10Z" fill="#d9434b"/>
-            <path d="M-6 -6L9 -9L9 1L-4 3Z" fill="#26365b" stroke="#25212d" stroke-width="2.5" stroke-linejoin="round"/>
-            <path d="M-8 -32Q-4 -39 5 -38Q13 -37 14 -28L11 -21L0 -20L-6 -24Z" fill="#f4bd8e" stroke="#28202a" stroke-width="2.5"/>
-            <path d="M-8 -31Q-4 -41 6 -40L13 -36L12 -32L3 -34L-4 -29Z" fill="#29232d"/>
-            <path d="M5 -29L7 -29" stroke="#29232d" stroke-width="2" stroke-linecap="round"/>
+            <g class="leg-front-thigh">
+              <path d="M-1 -1L12 8" fill="none" stroke="#211d29" stroke-width="9" stroke-linecap="round"/>
+              <path d="M-1 -1L12 8" fill="none" stroke="#f6bb8b" stroke-width="6" stroke-linecap="round"/>
+              <g class="leg-front-shin">
+                <path d="M12 8L21 20" fill="none" stroke="#211d29" stroke-width="9" stroke-linecap="round"/>
+                <path d="M12 8L21 20" fill="none" stroke="#f6bb8b" stroke-width="6" stroke-linecap="round"/>
+                <path d="M20 20L29 20" fill="none" stroke="#f8fbf5" stroke-width="5.5" stroke-linecap="round"/>
+                <path d="M22 22L30 22" fill="none" stroke="#72e5d4" stroke-width="2.5" stroke-linecap="round"/>
+              </g>
+            </g>
+            <g class="athlete-torso">
+              <path d="M-10 -20L5 -23L9 -7L-5 -4Z" fill="#f5f1e9" stroke="#25212d" stroke-width="2.5" stroke-linejoin="round"/>
+              <path d="M-5 -20L5 -21L8 -12L-3 -10Z" fill="#d9434b"/>
+              <path d="M-6 -6L9 -9L9 1L-4 3Z" fill="#26365b" stroke="#25212d" stroke-width="2.5" stroke-linejoin="round"/>
+              <path d="M-8 -32Q-4 -39 5 -38Q13 -37 14 -28L11 -21L0 -20L-6 -24Z" fill="#f4bd8e" stroke="#28202a" stroke-width="2.5"/>
+              <path d="M-8 -31Q-4 -41 6 -40L13 -36L12 -32L3 -34L-4 -29Z" fill="#29232d"/>
+              <path d="M5 -29L7 -29" stroke="#29232d" stroke-width="2" stroke-linecap="round"/>
+            </g>
             <g class="athlete-arm athlete-arm-front">
               <path d="M4 -20L15 -12L22 -19" fill="none" stroke="#28202a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
               <path d="M4 -20L15 -12L22 -19" fill="none" stroke="#f2b689" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
