@@ -559,13 +559,38 @@
 @media(max-width:700px) and (pointer:coarse) and (max-height:640px){
   .app.answer-reveal .game-stage .race-card .track{max-width:225px}
 }
+
+/* Single straight sprint. Every question starts again from the 0m line. */
+.race-card{--sprint-colour:#aab0b9}
+.race-card .straight-track{display:block;width:100%;height:auto;max-width:640px;margin:2px auto -5px;overflow:visible}
+.straight-track .sprint-markers text{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;fill:#ffe6d6;font-weight:850;font-size:12px;text-anchor:middle}
+.straight-track #progressPath{filter:drop-shadow(0 0 4px var(--sprint-colour));stroke-linecap:round}
+.straight-track .trail line{stroke:var(--sprint-colour);filter:drop-shadow(0 0 2px var(--sprint-colour))}
+.sprint-track-foot{padding:0 6px 12px;gap:10px}
+.sprint-track-foot>span{font-size:9px;letter-spacing:.8px;color:#fff3eb}
+.sprint-track-foot strong{text-align:right;font-size:11px;letter-spacing:.45px;color:var(--sprint-colour);transition:color .2s}
+.home-stage .race-card .straight-track{max-width:505px!important;margin:1px auto -3px!important}
+.game-stage .race-card .straight-track{max-width:550px!important;margin:0 auto -5px!important}
+@media(max-width:620px){
+  .home-stage .race-card .straight-track{max-width:440px!important}
+  .game-stage .race-card .straight-track{max-width:440px!important}
+  .sprint-track-foot{padding-bottom:7px}
+}
+@media(max-width:700px) and (pointer:coarse){
+  .app.answer-reveal .game-stage .race-card .straight-track{max-width:min(94vw,410px)!important;margin:0 auto -5px!important}
+  .app.answer-reveal .game-stage #raceCard{width:100%}
+}
+@media(max-width:700px) and (pointer:coarse) and (max-height:640px){
+  .app.answer-reveal .game-stage .race-card .straight-track{max-width:310px!important}
+}
+@media(prefers-reduced-motion:reduce){.sprint-track-foot strong{transition:none}}
 </style>
 </head>
 <body>
 <div class="app">
   <header class="top"><button id="brandHome" class="brand brand-home" type="button" aria-label="OUTSIDELANE: return to the start" title="Back to the start"><span class="brand-badge">OL</span>OUTSIDELANE</button><div class="top-right">The athletics daily</div></header>
   <section id="intro" class="hero"><div class="kicker"><span class="live-dot"></span> THE DAILY START LINE</div><h1>Think outside<br><em>the track.</em></h1><p class="sub">Think outside the track. Find the rarest answer. Eight athletics questions, 25 seconds each — and a race to the outside lane.</p></section>
-  <section id="raceCard" class="race-card" aria-label="Race track showing your score">
+  <section id="raceCard" class="race-card" aria-label="100 metre sprint visual and cumulative score">
     <div class="race-top">
       <div class="race-label-group"><span id="raceLabel">DAILY RACE</span><span class="race-label-sub">800M · 8 QUESTIONS</span></div>
       <div class="race-clock" id="raceClock" role="img" aria-label="Score 0 out of 800 metres">
@@ -575,14 +600,23 @@
       </div>
     </div>
     <div id="surgeBadge" class="surge-badge" aria-hidden="true">SURGE!</div>
-    <svg class="track" viewBox="0 0 500 235" role="img" aria-label="An athletics track with a runner representing your score">
-      <defs><linearGradient id="ovalFill" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#dd7864"/><stop offset="1" stop-color="#9d3b35"/></linearGradient></defs>
-      <path d="M112 27H388 A90 90 0 0 1 388 207H112 A90 90 0 0 1 112 27Z" fill="url(#ovalFill)" stroke="#fff" stroke-width="1" opacity=".92"/>
-      <path id="lane0" d="M112 43H388 A74 74 0 0 1 388 191H112 A74 74 0 0 1 112 43Z" fill="none" stroke="#ffffff" stroke-width="1.8" opacity=".7"/>
-      <path d="M112 59H388 A58 58 0 0 1 388 175H112 A58 58 0 0 1 112 59Z" fill="none" stroke="#ffffff" stroke-width="1.5" opacity=".65"/>
-      <path d="M112 75H388 A42 42 0 0 1 388 159H112 A42 42 0 0 1 112 75Z" fill="#762a2a" stroke="#fff" stroke-width="1.3"/>
-      <path d="M112 43H388 A74 74 0 0 1 388 191H112 A74 74 0 0 1 112 43Z" id="progressPath" pathLength="100" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round" stroke-dasharray="0 100" />
-      <g id="runner" transform="translate(112 43)">
+    <svg class="track straight-track" viewBox="0 0 500 180" role="img" aria-label="100 metre straight sprint showing how far this answer takes the runner">
+      <defs><linearGradient id="straightLaneFill" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ad5149"/><stop offset=".55" stop-color="#862e30"/><stop offset="1" stop-color="#5d2027"/></linearGradient></defs>
+      <rect x="26" y="27" width="448" height="114" rx="18" fill="url(#straightLaneFill)" stroke="#f2b6a8" stroke-width="1.5"/>
+      <path d="M41 43H458M41 126H458" fill="none" stroke="#fff9eb" stroke-width="2.5" opacity=".8"/>
+      <path d="M40 65H460M40 108H460" fill="none" stroke="#fff1e8" stroke-width="1" opacity=".38" stroke-dasharray="9 7"/>
+      <path id="lane0" d="M58 87H442" fill="none" stroke="#ffefdf" stroke-width="1.5" opacity=".28"/>
+      <path id="progressPath" d="M58 87H442" pathLength="100" fill="none" stroke="#aab0b9" stroke-width="9" stroke-linecap="round" stroke-dasharray="0 100"/>
+      <g aria-hidden="true">
+        <rect x="440" y="43" width="5" height="83" fill="#fff8ed"/>
+        <rect x="440" y="43" width="5" height="10" fill="#71282b"/><rect x="440" y="63" width="5" height="10" fill="#71282b"/><rect x="440" y="83" width="5" height="10" fill="#71282b"/><rect x="440" y="103" width="5" height="10" fill="#71282b"/><rect x="440" y="123" width="5" height="3" fill="#71282b"/>
+        <path d="M58 48v76" stroke="#fff8e8" stroke-width="2" opacity=".7"/>
+      </g>
+      <g class="sprint-markers" aria-hidden="true">
+        <path d="M58 144v5M96.4 144v5M173.2 144v5M288.4 144v5M384.4 144v5M442 144v5" fill="none" stroke="#ffe1d5" stroke-width="1.5" opacity=".7"/>
+        <text x="58" y="164">0</text><text x="96.4" y="164">10</text><text x="173.2" y="164">30</text><text x="288.4" y="164">60</text><text x="384.4" y="164">85</text><text x="442" y="164">100m</text>
+      </g>
+      <g id="runner" transform="translate(58 87)">
         <g class="trail" aria-hidden="true">
           <line x1="-24" y1="-1" x2="-9" y2="-1"/>
           <line x1="-28" y1="6" x2="-12" y2="6"/>
@@ -595,17 +629,8 @@
           </svg>
         </g>
       </g>
-      <g id="crowdGlow" aria-hidden="true">
-        <circle cx="145" cy="20" r="2"/><circle cx="165" cy="18" r="1.5"/><circle cx="335" cy="21" r="2"/><circle cx="355" cy="19" r="1.5"/>
-      </g>
-      <g id="finishSpark" aria-hidden="true">
-        <path d="M396 39l7 5-7 5 5-5z"/>
-        <path d="M393 47l10 0"/>
-      </g>
-      
-      <g transform="translate(108 20)"><path d="M0 0V42" stroke="#ffecdc" stroke-width="3"/><rect x="-3" y="10" width="12" height="22" fill="#ffffff"/><rect x="3" y="10" width="6" height="5.5" fill="#762a2a"/><rect x="-3" y="15.5" width="6" height="5.5" fill="#762a2a"/><rect x="3" y="21" width="6" height="5.5" fill="#762a2a"/><rect x="-3" y="26.5" width="6" height="5.5" fill="#762a2a"/></g>
     </svg>
-    <div class="track-foot"><span>START / FINISH</span><strong>RARE ANSWERS = MORE METRES</strong></div>
+    <div class="track-foot sprint-track-foot"><span>100M SPRINT · EACH ANSWER</span><strong id="sprintReadout" aria-live="polite">READY AT 0M</strong></div>
   </section>
   <section id="welcomeStats" class="stats"><div class="stat"><b>8</b><span>questions</span></div><div class="stat"><b>25s</b><span>per answer</span></div><div class="stat"><b>800m</b><span>maximum score</span></div></section>
   <main>
@@ -10397,8 +10422,8 @@ function buildStages(){
   homeCopy.id='homeRaceCard';
   // Give the preview unique IDs so the live clock and runner keep working.
   for(const el of homeCopy.querySelectorAll('[id]'))el.id='home-'+el.id;
-  homeCopy.innerHTML=homeCopy.innerHTML.replaceAll('url(#ovalFill)','url(#home-ovalFill)');
-  homeCopy.setAttribute('aria-label','Preview of the athletics track');
+  homeCopy.innerHTML=homeCopy.innerHTML.replaceAll('url(#straightLaneFill)','url(#home-straightLaneFill)');
+  homeCopy.setAttribute('aria-label','Preview of the 100 metre straight');
   const viewport=document.createElement('div');viewport.id='stageViewport';viewport.className='stage-window';
   const strip=document.createElement('div');strip.id='stageStrip';strip.className='stage-strip';
   const stages={};
@@ -10445,27 +10470,73 @@ function setupMobileKeyboard(){
   }
   updateViewport();
 }
+// Each question is a fresh straight sprint. Awarded metres are fixed tiers.
+const SPRINT_BANDS=[
+  {rawMin:95,metres:100,label:'VERY RARE',color:'#f6e94b'},
+  {rawMin:70,metres:85,label:'DEEP CUT',color:'#9964ff'},
+  {rawMin:50,metres:60,label:'RARE PICK',color:'#ef5350'},
+  {rawMin:25,metres:30,label:'SOLID PICK',color:'#75d6ff'},
+  {rawMin:1,metres:10,label:'POPULAR PICK',color:'#aab0b9'},
+  {rawMin:0,metres:0,label:'NO MARK',color:'#8b7474'}
+];
+function earnedSprintMetres(rawScore){
+  const value=Math.max(0,Number(rawScore)||0);
+  return SPRINT_BANDS.find(b=>value>=b.rawMin).metres;
+}
+function sprintBand(metres){
+  const value=Math.max(0,Number(metres)||0);
+  return SPRINT_BANDS.find(b=>value>=b.metres);
+}
 let runnerAt=0,runnerMotion=0;
-function positionRunner(percent){const line=byId('lane0');const path=byId('progressPath');path.setAttribute('stroke-dasharray',`${percent} ${100-percent}`);const pos=line.getPointAtLength(line.getTotalLength()*percent/100);byId('runner').setAttribute('transform',`translate(${pos.x} ${pos.y})`);byId('spriteFacing').setAttribute('transform',percent>48&&percent<97?'scale(-1 1)':'');}
+function positionRunner(percent){
+  const distance=Math.max(0,Math.min(100,Number(percent)||0));
+  const line=byId('lane0'),trail=byId('progressPath');
+  trail.setAttribute('stroke-dasharray',distance+' '+(100-distance));
+  const pos=line.getPointAtLength(line.getTotalLength()*distance/100);
+  byId('runner').setAttribute('transform','translate('+pos.x+' '+pos.y+')');
+  byId('spriteFacing').removeAttribute('transform');
+}
+function resetSprint(){
+  cancelAnimationFrame(runnerMotion);runnerMotion=0;runnerAt=0;positionRunner(0);
+  byId('progressPath').setAttribute('stroke','#aab0b9');
+  byId('raceCard').style.setProperty('--sprint-colour','#aab0b9');
+  byId('sprintReadout').textContent='READY AT 0M';
+  byId('sprintReadout').style.color='#ffe0d4';
+}
+function animateSprint(metres){
+  const band=sprintBand(metres),goal=Math.max(0,Math.min(100,Number(metres)||0));
+  cancelAnimationFrame(runnerMotion);runnerMotion=0;runnerAt=0;positionRunner(0);
+  byId('progressPath').setAttribute('stroke',band.color);
+  byId('raceCard').style.setProperty('--sprint-colour',band.color);
+  const label=byId('sprintReadout');
+  label.textContent=goal?band.label+' · '+goal+'M':'NO MARK · 0M';
+  label.style.color=band.color;
+  if(!goal||matchMedia('(prefers-reduced-motion: reduce)').matches){runnerAt=goal;positionRunner(goal);return;}
+  const start=performance.now(),duration=goal===100?1100:Math.round(570+goal*4.4);
+  function frame(now){
+    const t=Math.min(1,(now-start)/duration),eased=1-Math.pow(1-t,3);
+    runnerAt=goal*eased;positionRunner(runnerAt);
+    if(t<1)runnerMotion=requestAnimationFrame(frame);
+  }
+  runnerMotion=requestAnimationFrame(frame);
+}
+// The dot-matrix clock tracks cumulative metres, independent of each sprint.
 function moveRunner(metres,animated=false){
-  const chip=byId('mobileScoreChip');if(chip){chip.textContent=Math.round(metres)+'m';chip.setAttribute('aria-label','Current score '+Math.round(metres)+' metres');}
-  renderMiniClock(metres,animated);const goal=Math.max(0,Math.min(100,metres/800*100));cancelAnimationFrame(runnerMotion);
-  if(!animated||matchMedia('(prefers-reduced-motion: reduce)').matches){runnerAt=goal;positionRunner(goal);return;}
-  const from=runnerAt,start=performance.now(),duration=Math.max(450,Math.min(950,530+Math.abs(goal-from)*12));
-  function step(now){const t=Math.min(1,(now-start)/duration),ease=1-Math.pow(1-t,3);runnerAt=from+(goal-from)*ease;positionRunner(runnerAt);if(t<1)runnerMotion=requestAnimationFrame(step);}
-  runnerMotion=requestAnimationFrame(step);
+  const chip=byId('mobileScoreChip');
+  if(chip){chip.textContent=Math.round(metres)+'m';chip.setAttribute('aria-label','Current total '+Math.round(metres)+' metres');}
+  renderMiniClock(metres,animated);
 }
 // Image sprite is a single local sheet; no network service or graphics library needed.
 let pixelFrame=0;
 setInterval(()=>{if(document.hidden)return;const sprite=byId('pixelRunner');if(!sprite)return;pixelFrame=(pixelFrame+1)%6;sprite.setAttribute('viewBox',`${pixelFrame*30} 0 30 40`);},105);
 
-function setSuspense(active){byId('raceCard').classList.toggle('critical',active);byId('timer').classList.toggle('pulse',active);document.querySelector('.track').classList.toggle('suspense',active);}
-function triggerSurge(points){const badge=byId('surgeBadge');const race=byId('raceCard');const feedback=byId('feedback');clearTimeout(surgeTimer);badge.textContent=points>=90?'DEEP CUT!':points>=70?'SURGE!':points>=50?'BIG PICK!':'ON THE BOARD!';badge.classList.remove('show');race.classList.remove('surge');feedback.classList.remove('surge-good');void badge.offsetWidth;void race.offsetWidth;badge.classList.add('show');race.classList.add('surge');feedback.classList.add('surge-good');surgeTimer=setTimeout(()=>{race.classList.remove('surge');feedback.classList.remove('surge-good');},900);}
-function showWelcome(){cancelAnimationFrame(ticker);setSuspense(false);document.querySelector('.app').classList.remove('answer-reveal','keyboard-open','keyboard-tight');const played=readSaved();byId('dateLabel').textContent='DAILY HEAT · '+new Date(utcDate()+'T12:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short',timeZone:'UTC'}).toUpperCase();byId('homePanel').querySelector('h2').textContent=played?'Your daily race is complete.':'How far can you go?';byId('homePanel').querySelector('p').textContent=played?'Your result is saved on this device. A new heat arrives tomorrow.':'Broad prompts with dozens or hundreds of correct athletes. The rarer your answer, the further you run.';byId('startDaily').querySelector('.home-start-label').textContent=played?'VIEW TODAY’S RESULT':"RUN TODAY'S HEAT";byId('raceLabel').textContent='DAILY RACE';moveRunner(played?played.total:0);byId('home-raceClockDigits').innerHTML=byId('raceClockDigits').innerHTML;showPanel('homePanel');}
+function setSuspense(active){byId('raceCard').classList.toggle('critical',active);byId('timer').classList.toggle('pulse',active);byId('raceCard').querySelector('.track').classList.toggle('suspense',active);}
+function triggerSurge(points){const badge=byId('surgeBadge');const race=byId('raceCard');const feedback=byId('feedback');clearTimeout(surgeTimer);badge.textContent=points>=100?'VERY RARE!':points>=85?'DEEP CUT!':points>=60?'RARE PICK!':points>=30?'SOLID PICK!':'ON THE BOARD!';badge.classList.remove('show');race.classList.remove('surge');feedback.classList.remove('surge-good');void badge.offsetWidth;void race.offsetWidth;badge.classList.add('show');race.classList.add('surge');feedback.classList.add('surge-good');surgeTimer=setTimeout(()=>{race.classList.remove('surge');feedback.classList.remove('surge-good');},900);}
+function showWelcome(){cancelAnimationFrame(ticker);setSuspense(false);resetSprint();document.querySelector('.app').classList.remove('answer-reveal','keyboard-open','keyboard-tight');const played=readSaved();byId('dateLabel').textContent='DAILY HEAT · '+new Date(utcDate()+'T12:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short',timeZone:'UTC'}).toUpperCase();byId('homePanel').querySelector('h2').textContent=played?'Your daily race is complete.':'How far can you go?';byId('homePanel').querySelector('p').textContent=played?'Your result is saved on this device. A new heat arrives tomorrow.':'Broad prompts with dozens or hundreds of correct athletes. The rarer your answer, the further you run.';byId('startDaily').querySelector('.home-start-label').textContent=played?'VIEW TODAY’S RESULT':"RUN TODAY'S HEAT";byId('raceLabel').textContent='DAILY RACE';moveRunner(played?played.total:0);byId('home-raceClockDigits').innerHTML=byId('raceClockDigits').innerHTML;showPanel('homePanel');}
 function readSaved(){try{const v=localStorage.getItem(dailyStorageKey());return v?JSON.parse(v):null;}catch{return null;}}
 function mobileGameDevice(){return window.matchMedia('(max-width:700px) and (pointer:coarse)').matches;}
-function startRun(){cancelAnimationFrame(ticker);setSuspense(false);questions=selectQuestions();questionIndex=0;total=0;answers=[];locked=false;byId('raceLabel').textContent='TODAY’S HEAT';moveRunner(0);descendTo('game');if(mobileGameDevice()){loadQuestion();return;}setTimeout(()=>{if(document.querySelector('.app').dataset.stage==='game')loadQuestion();},window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:850);}
-function loadQuestion(){cancelAnimationFrame(ticker);setSuspense(false);byId('surgeBadge').classList.remove('show');locked=false;remaining=25;byId('countLabel').textContent='ROUND '+(questionIndex+1)+' OF 8';byId('topicLabel').textContent=questions[questionIndex].topic;byId('questionText').textContent=questions[questionIndex].prompt;byId('questionDesc').textContent=questions[questionIndex].note;const source=questions[questionIndex].source;byId('sourceLink').href=officialSeed.sources[source];byId('sourceLink').textContent=({world:'WORLD ATHLETICS ENTRIES ↗',europe:'EUROPEAN ATHLETICS ENTRIES ↗',usatf:'USATF OFFICIAL RESULTS ↗'})[source] || ({toplists:'WORLD ATHLETICS TOP LIST ↗',world_outdoor:'WORLD ATHLETICS RESULTS ↗',euro_outdoor:'EUROPEAN OUTDOOR RESULTS ↗',usatf_outdoor:'USATF OUTDOOR RESULTS ↗',diamond_league:'DIAMOND LEAGUE SOURCE ↗',british_champs:'BRITISH ATHLETICS SOURCE ↗',marathon_majors:'MARATHON RESULTS & HISTORY ↗'})[questions[questionIndex].bucket] || 'OFFICIAL SOURCE ↗';byId('answerInput').value='';byId('answerInput').disabled=false;byId('submitAnswer').disabled=false;byId('answerForm').classList.remove('hide');byId('nextButton').classList.add('hide');byId('feedback').classList.add('hide');byId('validationMessage').textContent='';byId('answerSuggestions').replaceChildren();byId('answerSuggestions').classList.add('hide');drawDots();deadline=Date.now()+25000;document.querySelector('.app').classList.remove('answer-reveal');updateClock();
+function startRun(){cancelAnimationFrame(ticker);setSuspense(false);resetSprint();questions=selectQuestions();questionIndex=0;total=0;answers=[];locked=false;byId('raceLabel').textContent='TODAY’S HEAT';moveRunner(0);descendTo('game');if(mobileGameDevice()){loadQuestion();return;}setTimeout(()=>{if(document.querySelector('.app').dataset.stage==='game')loadQuestion();},window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:850);}
+function loadQuestion(){cancelAnimationFrame(ticker);setSuspense(false);resetSprint();byId('surgeBadge').classList.remove('show');locked=false;remaining=25;byId('countLabel').textContent='ROUND '+(questionIndex+1)+' OF 8';byId('topicLabel').textContent=questions[questionIndex].topic;byId('questionText').textContent=questions[questionIndex].prompt;byId('questionDesc').textContent=questions[questionIndex].note;const source=questions[questionIndex].source;byId('sourceLink').href=officialSeed.sources[source];byId('sourceLink').textContent=({world:'WORLD ATHLETICS ENTRIES ↗',europe:'EUROPEAN ATHLETICS ENTRIES ↗',usatf:'USATF OFFICIAL RESULTS ↗'})[source] || ({toplists:'WORLD ATHLETICS TOP LIST ↗',world_outdoor:'WORLD ATHLETICS RESULTS ↗',euro_outdoor:'EUROPEAN OUTDOOR RESULTS ↗',usatf_outdoor:'USATF OUTDOOR RESULTS ↗',diamond_league:'DIAMOND LEAGUE SOURCE ↗',british_champs:'BRITISH ATHLETICS SOURCE ↗',marathon_majors:'MARATHON RESULTS & HISTORY ↗'})[questions[questionIndex].bucket] || 'OFFICIAL SOURCE ↗';byId('answerInput').value='';byId('answerInput').disabled=false;byId('submitAnswer').disabled=false;byId('answerForm').classList.remove('hide');byId('nextButton').classList.add('hide');byId('feedback').classList.add('hide');byId('validationMessage').textContent='';byId('answerSuggestions').replaceChildren();byId('answerSuggestions').classList.add('hide');drawDots();deadline=Date.now()+25000;document.querySelector('.app').classList.remove('answer-reveal');updateClock();
   // Keyboard opening on iOS requires a real tap: this function is called directly
   // from RUN TODAY'S HEAT / NEXT QUESTION for mobile.
   if(window.matchMedia('(min-width: 700px)').matches||mobileGameDevice())byId('answerInput').focus({preventScroll:true});}
@@ -10573,15 +10644,15 @@ function submit(event){
     :'Not in the current verified answer list. Please try another before time runs out.';
   byId('answerInput').focus();
 }
-function category(points){if(points>=90)return 'DEEP CUT';if(points>=70)return 'RARE PICK';if(points>=50)return 'UNCOMMON';if(points>=25)return 'SOLID KNOWLEDGE';return 'POPULAR PICK';}
-function finalize(entry){if(locked)return;locked=true;setSuspense(false);cancelAnimationFrame(ticker);byId('answerInput').blur();const app=document.querySelector('.app');app.classList.remove('keyboard-open','keyboard-tight');app.classList.add('answer-reveal');byId('answerInput').disabled=true;byId('submitAnswer').disabled=true;byId('answerForm').classList.add('hide');byId('answerSuggestions').classList.add('hide');byId('nextButton').classList.remove('hide');const points=entry?entry[1]:0;total+=points;answers.push({topic:questions[questionIndex].topic,prompt:questions[questionIndex].prompt,name:entry?entry[0]:'No accepted answer',points});moveRunner(total,!!entry);byId('feedback').classList.remove('hide','missed','surge-good');if(entry){triggerSurge(points);byId('feedbackBig').textContent=`+${points} METRES · ${category(points)}`;byId('feedbackMsg').textContent=entry[0]+' — on the board.';}else{byId('feedback').classList.add('missed');byId('feedbackBig').textContent='+0 METRES · TIME UP';byId('feedbackMsg').textContent='No accepted answer this round. Reset and go again on the next one.';}byId('nextButton').textContent=questionIndex===7?'SEE MY RESULT →':'NEXT QUESTION →';byId('announce').textContent=`${points} metres. ${category(points)}.`;}
+function category(points){return sprintBand(points).label;}
+function finalize(entry){if(locked)return;locked=true;setSuspense(false);cancelAnimationFrame(ticker);byId('answerInput').blur();const app=document.querySelector('.app');app.classList.remove('keyboard-open','keyboard-tight');app.classList.add('answer-reveal');byId('answerInput').disabled=true;byId('submitAnswer').disabled=true;byId('answerForm').classList.add('hide');byId('answerSuggestions').classList.add('hide');byId('nextButton').classList.remove('hide');const points=entry?earnedSprintMetres(entry[1]):0;total+=points;answers.push({topic:questions[questionIndex].topic,prompt:questions[questionIndex].prompt,name:entry?entry[0]:'No accepted answer',points});moveRunner(total,!!entry);animateSprint(points);byId('feedback').classList.remove('hide','missed','surge-good');if(entry){triggerSurge(points);byId('feedbackBig').textContent=`+${points} METRES · ${category(points)}`;byId('feedbackMsg').textContent=entry[0]+' — on the board.';}else{byId('feedback').classList.add('missed');byId('feedbackBig').textContent='+0 METRES · TIME UP';byId('feedbackMsg').textContent='No accepted answer this round. Reset and go again on the next one.';}byId('nextButton').textContent=questionIndex===7?'SEE MY RESULT →':'NEXT QUESTION →';byId('announce').textContent=`${points} metres. ${category(points)}.`;}
 function nextQuestion(){if(!locked)return;questionIndex++;if(questionIndex>=questions.length){finishRun();return;}loadQuestion();}
 function finishRun(){cancelAnimationFrame(ticker);const correct=answers.filter(a=>a.points>0).length;const result={date:utcDate(),total,answers,correct};try{localStorage.setItem(dailyStorageKey(),JSON.stringify(result));}catch{}showResults(result);}
 function showResults(result){setSuspense(false);document.querySelector('.app').classList.remove('answer-reveal','keyboard-open','keyboard-tight');moveRunner(result.total);renderSharePoster(result);byId('resultsTitle').textContent=result.total>=550?'ELITE KNOWLEDGE.':result.total>=350?'GREAT RACE.':result.total>=170?'NICE RUN.':'THE FINISH LINE.';byId('resultsSubtitle').textContent=(result.date||utcDate())+' · '+'Daily heat'+' · 8 rounds';byId('finalScore').textContent=result.total;byId('finalHits').textContent=result.correct+' / 8';byId('answerReview').innerHTML='';(result.answers||[]).forEach((a,i)=>{const item=document.createElement('div');item.className='review-item';const n=document.createElement('div');n.className='review-index';n.textContent=String(i+1).padStart(2,'0');const answer=document.createElement('div');answer.className='review-name';const title=document.createElement('div');title.textContent=a.name;const sub=document.createElement('div');sub.className='review-topic';sub.textContent=a.topic;answer.append(title,sub);const pts=document.createElement('div');pts.className='review-score';pts.textContent='+'+a.points;item.append(n,answer,pts);byId('answerReview').appendChild(item);});descendTo('results');}
 
 // Share card: a spoiler-free visual that fits a single mobile screenshot.
 function scoreHeadline(metres){return metres>=640?'LEGENDARY<br>LANE.':metres>=470?'OUTSIDE<br>THE PACK.':metres>=270?'FIND YOUR<br>LANE.':'KEEP<br>CHASING.';}
-function splitTier(points){return points===0?{label:'NO MARK',color:'#866261'}:points>=90?{label:'DEEP CUT',color:'#ffffff'}:points>=70?{label:'RARE PICK',color:'#f7d99f'}:points>=50?{label:'UNCOMMON',color:'#ffb58d'}:points>=25?{label:'SOLID',color:'#d8a096'}:{label:'POPULAR',color:'#b77b73'};}
+function splitTier(points){const band=sprintBand(points);return {label:band.label,color:band.color};}
 function readableDate(iso){const d=new Date((iso||utcDate())+'T12:00:00Z');return d.toLocaleDateString('en-GB',{timeZone:'UTC',day:'2-digit',month:'short',year:'numeric'}).toUpperCase();}
 // 5x7 square-LED glyphs shared by the live board and the exported PNG.
 const MATRIX_DIGITS={
@@ -10770,11 +10841,11 @@ function renderSharePoster(result){
 }
 // A split inspector is only visible after selecting a row; exports stay spoiler-free.
 const RESULT_TIERS=[
-  {label:'POPULAR',lo:1,hi:24,range:'1–24m'},
-  {label:'SOLID',lo:25,hi:49,range:'25–49m'},
-  {label:'UNCOMMON',lo:50,hi:69,range:'50–69m'},
-  {label:'RARE PICK',lo:70,hi:89,range:'70–89m'},
-  {label:'DEEP CUT',lo:90,hi:100,range:'90–100m'}
+  {label:'POPULAR PICK',lo:1,hi:24,range:'10m'},
+  {label:'SOLID PICK',lo:25,hi:49,range:'30m'},
+  {label:'RARE PICK',lo:50,hi:69,range:'60m'},
+  {label:'DEEP CUT',lo:70,hi:94,range:'85m'},
+  {label:'VERY RARE',lo:95,hi:100,range:'100m'}
 ];
 function questionForSplit(result,index){
   const round=result.answers?.[index];if(!round)return null;
@@ -10807,7 +10878,7 @@ function openSplitDetails(index){
     if(!matches.length){const unavailable=document.createElement('span');unavailable.className='tier-empty';unavailable.textContent=question?'No indexed examples at this level.':'Examples unavailable for this older result.';list.append(unavailable);}
     for(const example of matches){const item=document.createElement('div');item.className='tier-example-item';
       const name=document.createElement('span');name.textContent=example[0];
-      const points=document.createElement('b');points.textContent=example[1]+'m';
+      const points=document.createElement('b');points.textContent=earnedSprintMetres(example[1])+'m';
       item.append(name,points);list.append(item);
     }
     section.append(list);target.append(section);
@@ -10881,7 +10952,7 @@ function downloadPoster(blob,filename){const a=document.createElement('a');const
 async function saveImage(){const btn=byId('saveScoreImage');btn.disabled=true;byId('shareStatus').textContent='Creating your scorecard…';try{const r=activeResult();downloadPoster(await makePosterBlob(r),imageFilename(r));byId('shareStatus').textContent='Scorecard downloaded. Ready to post.';}catch(e){byId('shareStatus').textContent='Could not create the image in this browser.';}finally{btn.disabled=false;}}
 async function shareImage(){const btn=byId('shareScoreImage');btn.disabled=true;byId('shareStatus').textContent='Preparing your share card…';try{const r=activeResult(),blob=await makePosterBlob(r),file=new File([blob],imageFilename(r),{type:'image/png'});if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){byId('shareStatus').textContent='Choose where to share your result.';await navigator.share({files:[file],title:'OUTSIDELANE · '+r.total+'/800m',text:'Think outside the track.'});byId('shareStatus').textContent='Share action completed.';}else{downloadPoster(blob,file.name);byId('shareStatus').textContent='Image downloaded — share it anywhere.';}}catch(e){byId('shareStatus').textContent=e?.name==='AbortError'?'Sharing cancelled.':'Could not share; try Save Image instead.';}finally{btn.disabled=false;}}
 function deployedGameUrl(){return /^https?:$/.test(location.protocol)&&!['localhost','127.0.0.1'].includes(location.hostname)?location.origin+location.pathname:null;}
-function getShareText(){const data=readSaved()||{total,answers};const squares=(data.answers||[]).map(a=>a.points>=90?'🟩':a.points>=70?'🟨':a.points>=50?'🟧':a.points>0?'🟫':'⬛').join('');return `OUTSIDELANE · Daily ${utcDate()}\n🏃 ${data.total}/800 metres\n${squares}\n8 questions. 25 seconds each. How rare are you?${deployedGameUrl()?'\n'+deployedGameUrl():''}`}
+function getShareText(){const data=readSaved()||{total,answers};const squares=(data.answers||[]).map(a=>a.points>=100?'🟨':a.points>=85?'🟪':a.points>=60?'🟥':a.points>=30?'🟦':a.points>=10?'⬜':'⬛').join('');return `OUTSIDELANE · Daily ${utcDate()}\n🏃 ${data.total}/800 metres\n${squares}\n8 questions. 25 seconds each. How rare are you?${deployedGameUrl()?'\n'+deployedGameUrl():''}`}
 async function share(){const message=getShareText();try{if(navigator.clipboard){await navigator.clipboard.writeText(message);byId('shareStatus').textContent='Spoiler-free score copied to clipboard.';return;}}catch(e){}window.prompt('Copy your result:',message);}
 byId('backToHome').addEventListener('click',()=>showWelcome());
 byId('resultWordmark').addEventListener('click',()=>showWelcome());
